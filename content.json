@@ -1,0 +1,199 @@
+{
+ "address": "epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f",
+ "address_index": 65083614,
+ "background-color": "white",
+ "background-color-dark": "#30363c",
+ "clone_root": "",
+ "cloneable": true,
+ "cloned_from": "epix1dashuu6pvsut7aw9dx44f543mv7xt9zlydsj9t",
+ "default_page": "index.html",
+ "description": "Publish your thoughts, uncensored",
+ "epixnet_version": "0.0.2",
+ "files": {
+  "LICENSE": {
+   "sha512": "e67014a69caa38c58575f333619243c9ebb3c98d462f0b4823ff5ed3d2cfdba3",
+   "size": 1077
+  },
+  "alloy-editor/all.css": {
+   "sha512": "7f92b9206df4994b119df0123734193ad95c5961c2b5190aa1e60f394026d150",
+   "size": 63384
+  },
+  "alloy-editor/all.js": {
+   "sha512": "0c917acb6b3f7397d37263a8ee01100929e7aed3c752b2103cb884f65aef7b23",
+   "size": 737537
+  },
+  "css/all.css": {
+   "sha512": "f6f960ad7f138bcc251af5ef687106be050cf9d48bab95ac59398b5ba31c2abe",
+   "size": 124423
+  },
+  "data-default/data.json": {
+   "sha512": "2e148ded67a3e4cfc86db1cdbaf87bb425ab8597dac15a9b351c2a1c175a0da8",
+   "size": 398
+  },
+  "data-default/users/content-default.json": {
+   "sha512": "627090bd9043f3a3aa362034dd941318c366c4858f67539d31a97e31bf918559",
+   "size": 285
+  },
+  "data/data.json": {
+   "sha512": "a6f897e1f8d7133676d7fbebf332ae493263e3318ac23258c8fe8cea211d33e3",
+   "size": 412
+  },
+  "dbschema.json": {
+   "sha512": "e67019aa04a58953fd92b81503ed33f398f092dcd3b8cb4d204c7742f618fe8f",
+   "size": 2571
+  },
+  "img/avatar.png": {
+   "sha512": "a656c470967e27c2b385182a361db8bab1696fe3b2d79c86394236d02ce42eb8",
+   "size": 87
+  },
+  "img/eblog.png": {
+   "sha512": "b9d887bd2f147abb7d75dcb0e6e973a60c4a07affc188b429bab8a0774bd7e39",
+   "size": 142602
+  },
+  "img/loading.gif": {
+   "sha512": "8a42b98962faea74618113166886be488c09dad10ca47fe97005edc5fb40cc00",
+   "size": 723
+  },
+  "index.html": {
+   "sha512": "3a31937b01a631a25195973ae5f8be799ca343d3d459a7b71a9ef83234019e25",
+   "size": 7880
+  },
+  "js/Comments.js": {
+   "sha512": "459ab2b1f02c1e086be3d0de6e0463b02078f5e79fff8520a1273517ac76310e",
+   "size": 7881
+  },
+  "js/EpixBlog.js": {
+   "sha512": "b882a233075f9581213ce328d698374e82ff1d282f01070316e390d7f2e134f0",
+   "size": 30277
+  },
+  "js/lib/00-jquery.min.js": {
+   "sha512": "eda31b5c7d371d4b3acced51fa92f27a417515317cf437aae09a47c3acc8a36b",
+   "size": 84320
+  },
+  "js/lib/epixframe.js": {
+   "sha512": "8cb66604615c662afc621127a3ab534d23323ad4bbfe068d9dae7a62fba73ae9",
+   "size": 18957
+  },
+  "js/lib/highlight.min.js": {
+   "sha512": "5c9fa4051a01150a6cd7b9b5fe809b6c448426d5ccac22aae8bb366bd30a4b0a",
+   "size": 47214
+  },
+  "js/lib/identicon.js": {
+   "sha512": "6f8c336ec9ab0f2aff901e2e0ea640cbc89a4997cb4130b8b214e54084cacfe0",
+   "size": 3057
+  },
+  "js/lib/jquery.cssanim.js": {
+   "sha512": "08011daa9466d883298911bbf933ade53cc5d76c29329a3e23a190041c68d656",
+   "size": 1145
+  },
+  "js/lib/jquery.csslater.js": {
+   "sha512": "6c9b179e95e99fbe60667b083843fdc6720ff331cdb09300a2f7a0321d2796c2",
+   "size": 2330
+  },
+  "js/lib/marked.min.js": {
+   "sha512": "0e3b6f396fa40ef57e78c7d2112c14748f2ee5145c9c98712566a4f805834a58",
+   "size": 23565
+  },
+  "js/lib/pnglib.js": {
+   "sha512": "fdfc643e7c464c21c44d5865efe5b2db724caa4877655a457d12ef85e095909e",
+   "size": 6257
+  },
+  "js/lib/zoom.min.js": {
+   "sha512": "a4d13bc19a990b8d9a02c52b708e9005ba09e013302b030bff8dc68167d20671",
+   "size": 8029
+  },
+  "js/utils/CustomAlloyEditor.js": {
+   "sha512": "ce0414f67028a480153fb31c68c9b5e93fbd9ea7dddeef8865950539e4b60c51",
+   "size": 9256
+  },
+  "js/utils/Follow.js": {
+   "sha512": "5fb72de6dd225222a379a7febdeaf1fbde56ecc65965a5790919be9ba870dca1",
+   "size": 3706
+  },
+  "js/utils/InlineEditor.js": {
+   "sha512": "8c55131ba5fbaa327bb0b41fa193e1fd8612cf7f2180519645558948cebc4a6b",
+   "size": 7265
+  },
+  "js/utils/LogMixin.js": {
+   "sha512": "5d393d9e466748562c1c4c9750d3d013d6e04b887b81998dd9246c841e3fff42",
+   "size": 607
+  },
+  "js/utils/Meditor.js": {
+   "sha512": "20fbff41a3898ce66bdd10386fa904d67d11ed78698b3c13c54836f833edcd07",
+   "size": 4326
+  },
+  "js/utils/Menu.js": {
+   "sha512": "cf4a243437d9220ac53b8f7da7b977e0f1ae4cb72e5ced720e366c97c36642c2",
+   "size": 1744
+  },
+  "js/utils/RateLimit.js": {
+   "sha512": "65f0dc7592eaa42e669a219b08ce0cbe9b5732175b5480f48d5d95971a33cff3",
+   "size": 451
+  },
+  "js/utils/Text.js": {
+   "sha512": "e961bfc460898b0cad6e0b748c0c8f1107e590c86bd6a6c481c1f4d6b5d2da0b",
+   "size": 1764
+  },
+  "js/utils/Time.js": {
+   "sha512": "bee798dc4847a952391893aeb8b12f450e04b3a3f63f4ca308e879c79cdedc78",
+   "size": 1404
+  },
+  "js/utils/Translate.js": {
+   "sha512": "139a2471dc2d67eb851b541eab8e9e7d5d6479bcf0ba54c4f32398dad93c55da",
+   "size": 1205
+  },
+  "js/utils/User.js": {
+   "sha512": "be6ed24f334c237d4d6b974cd4b68fd173193490508e3b836208ac4b0a485174",
+   "size": 7194
+  },
+  "languages/de.json": {
+   "sha512": "8b06813b336127dc001db9a87518c94936de760c760be1109e4bf2572fd24fb8",
+   "size": 2505
+  },
+  "languages/es.json": {
+   "sha512": "a7e1afc6d7bf24336220d7ff566d7b120d2d302724f4842bb71239ff8dcc42ed",
+   "size": 893
+  },
+  "languages/fr.json": {
+   "sha512": "1aefedcde8a3679b80e3bef992699678ad81cf1f841b472285a123f01aa0bf85",
+   "size": 1843
+  },
+  "languages/it.json": {
+   "sha512": "8b1b45500aa64c36a23fa84a456769c7cbcd3e89b53062d0d465e11392aad84f",
+   "size": 834
+  },
+  "languages/nl.json": {
+   "sha512": "03803e38b3a767f8be28beededcca2c0511afd41e3eacf60fed28212b60d831d",
+   "size": 943
+  },
+  "languages/pl.json": {
+   "sha512": "cfb30754900ff138cf2e4fe244ab80e41bd89ab4e1576a496cec1763ef60453c",
+   "size": 889
+  },
+  "languages/pt-br": {
+   "sha512": "0b880689dcda151d61dcb0305bb788a3ad178b1295d3ce0153e49f54ab84b8c7",
+   "size": 852
+  },
+  "languages/zh.json": {
+   "sha512": "7a1c0fecab7756c0f13ce7e0c0b2e8412d86e642931f5b08316ee0b5584b4deb",
+   "size": 2019
+  }
+ },
+ "ignore": "((css|alloy-editor)/(?!all\\.(js|css))|data/.*db|data/users/.*|.*\\.coffee|js/all\\.js|js/lib/all\\.js|\\.git)",
+ "includes": {
+  "data/users/content.json": {
+   "signers": [],
+   "signers_required": 1
+  }
+ },
+ "inner_path": "content.json",
+ "modified": 1773633003,
+ "optional": "data/video/.*mp4",
+ "postmessage_nonce_security": true,
+ "signers_sign": "HCw3hYH2z0TJPlNJsBMIptwXsXm78VOSetRIFv1EojQlQih7CK+icYj20pLBPbo6yix18QtuGyIOLoZ93rNs2yI=",
+ "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "G3+eY9FUM9txbJbCaFCfEfKh/3Q+sPHD0NJ9zYnlcYYmY8C4wyoNUH3DhELP/tz7Koeq10AXqzTz3l0Umq5E4Pg="},
+ "signs_required": 1,
+ "title": "Epix Blog",
+ "translate": ["index.html","js/EpixBlog.js","js/Comments.js","js/utils/User.js","js/utils/Translate.js","js/utils/Text.js","js/utils/InlineEditor.js","js/utils/Follow.js","alloy-editor/all.js"],
+ "viewport": "width=device-width, initial-scale=0.8"
+}

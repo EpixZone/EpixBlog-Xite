@@ -1,0 +1,20 @@
+{
+ "address": "epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f",
+ "files": {},
+ "ignore": ".*",
+ "inner_path": "data/users/content.json",
+ "modified": 1773633003,
+ "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "HJR0o6A7ipXiNPuqZJFZlRT01fudlOB8zF0NhA+FSPeuW4kr21sNJ9sZQym9vHNzgsHwuM6e0M6Ur5eT05woX2Y="},
+ "user_contents": {
+  "cert_signers": {
+   "xid": ["chain"]
+  },
+  "permission_rules": {
+   ".*": {
+    "files_allowed": "data.json",
+    "max_size": 40000
+   }
+  },
+  "permissions": {}
+ }
+}

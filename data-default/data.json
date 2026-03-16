@@ -1,0 +1,17 @@
+{
+	"title": "My Epix Blog",
+	"description": "My Epix Blog.",
+	"links": "- [EpixNet](https://epixnet.io)",
+	"next_post_id": 2,
+	"demo": false,
+	"footer": "Powered by [EpixNet](https://epixnet.io) [open, free, and uncensored]",
+	"modified": 0,
+	"post": [
+		{
+			"post_id": 1,
+			"title": "Congratulations!",
+			"date_published": 0,
+			"body": "Your Epix blog has been successfully created!"
+		}
+	]
+}
