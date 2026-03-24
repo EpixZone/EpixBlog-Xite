@@ -3,11 +3,11 @@
  "files": {},
  "ignore": ".*",
  "inner_path": "data/users/content.json",
- "modified": 1773633003,
- "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "HJR0o6A7ipXiNPuqZJFZlRT01fudlOB8zF0NhA+FSPeuW4kr21sNJ9sZQym9vHNzgsHwuM6e0M6Ur5eT05woX2Y="},
+ "modified": 1773684676,
+ "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "G79g+3fBe8HQjr6SEt8bbj936RFH6RHgsKGTavdT+dWAa7TiAgqsAC9eErw7z8ZAB9VWESkWHVm7MiuunmwDsTQ="},
  "user_contents": {
   "cert_signers": {
-   "xid": ["chain"]
+   "xid.epix": ["chain"]
   },
   "permission_rules": {
    ".*": {

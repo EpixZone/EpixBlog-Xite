@@ -4,7 +4,7 @@
   "modified": 1432466966.003,
   "user_contents": {
     "cert_signers": {
-      "xid": ["chain"]
+      "xid.epix": ["chain"]
     },
     "permission_rules": {
       ".*": {

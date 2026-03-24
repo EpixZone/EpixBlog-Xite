@@ -14,6 +14,10 @@
    "sha512": "e67014a69caa38c58575f333619243c9ebb3c98d462f0b4823ff5ed3d2cfdba3",
    "size": 1077
   },
+  "README.md": {
+   "sha512": "14544583d3ebcda9a677ab7021e8d744a1a8b05e7def5ac1219f3d2e1d9c07a6",
+   "size": 1685
+  },
   "alloy-editor/all.css": {
    "sha512": "7f92b9206df4994b119df0123734193ad95c5961c2b5190aa1e60f394026d150",
    "size": 63384
@@ -187,11 +191,11 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1773633003,
+ "modified": 1773684676,
  "optional": "data/video/.*mp4",
  "postmessage_nonce_security": true,
  "signers_sign": "HCw3hYH2z0TJPlNJsBMIptwXsXm78VOSetRIFv1EojQlQih7CK+icYj20pLBPbo6yix18QtuGyIOLoZ93rNs2yI=",
- "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "G3+eY9FUM9txbJbCaFCfEfKh/3Q+sPHD0NJ9zYnlcYYmY8C4wyoNUH3DhELP/tz7Koeq10AXqzTz3l0Umq5E4Pg="},
+ "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "HPBI8aD0e8Wa/ynQ7fm8eC+lHj+K+rPEknr4Bm1n9DetMTIIxhkM6G40k3gpInryDmDoNyMUXBFg4p9R916nhqk="},
  "signs_required": 1,
  "title": "Epix Blog",
  "translate": ["index.html","js/EpixBlog.js","js/Comments.js","js/utils/User.js","js/utils/Translate.js","js/utils/Text.js","js/utils/InlineEditor.js","js/utils/Follow.js","alloy-editor/all.js"],
