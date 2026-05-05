@@ -8,7 +8,8 @@
  "cloned_from": "epix1dashuu6pvsut7aw9dx44f543mv7xt9zlydsj9t",
  "default_page": "index.html",
  "description": "Publish your thoughts, uncensored",
- "epixnet_version": "0.0.2",
+ "domain": "blog.epix",
+ "epixnet_version": "0.2.4",
  "files": {
   "LICENSE": {
    "sha512": "e67014a69caa38c58575f333619243c9ebb3c98d462f0b4823ff5ed3d2cfdba3",
@@ -39,8 +40,8 @@
    "size": 290
   },
   "data/data.json": {
-   "sha512": "2703fc25e4e5ef83b94137586f668a93acedd5aaccba268e5a64a349bb16f9b2",
-   "size": 1919
+   "sha512": "14ae4266c55867eb5923946d60ef87a4f38aa94dcaebab932b53fecdaf8eec5f",
+   "size": 15026
   },
   "dbschema.json": {
    "sha512": "e67019aa04a58953fd92b81503ed33f398f092dcd3b8cb4d204c7742f618fe8f",
@@ -191,11 +192,11 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1775004025,
+ "modified": 1778005625,
  "optional": "data/video/.*mp4",
  "postmessage_nonce_security": true,
  "signers_sign": "HCw3hYH2z0TJPlNJsBMIptwXsXm78VOSetRIFv1EojQlQih7CK+icYj20pLBPbo6yix18QtuGyIOLoZ93rNs2yI=",
- "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "G9Qac6Hf77agxc/6o4jiQTdrOLDFHLIFhzNza+CdoAR5a+eDZl1RX4j2PzqwYgapbqhyTpLS40zyB9jaR94KM9s="},
+ "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "HDdtKH54jODCfQqMADD4MFk1SLhjmlRqXQZdk3S8Dj9DKlHUPJi/3VSp5dWikFA32Xk77+MrsXKeJJc6nWV5/bY="},
  "signs_required": 1,
  "title": "Epix Blog",
  "translate": ["index.html","js/EpixBlog.js","js/Comments.js","js/utils/User.js","js/utils/Translate.js","js/utils/Text.js","js/utils/InlineEditor.js","js/utils/Follow.js","alloy-editor/all.js"],
