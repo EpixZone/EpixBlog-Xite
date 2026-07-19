@@ -129,13 +129,8 @@
       $(".comment-new .button-submit").addClass("loading");
       var user_dir = Page.site_info.xid_directory || Page.site_info.auth_address;
       var inner_path = "data/users/" + user_dir + "/data.json";
-      Page.cmd("fileGet", {"inner_path": inner_path, "required": false}, function(data) {
-        if (data) {
-          data = JSON.parse(data);
-        } else {
-          data = {"next_comment_id": 1, "comment": [], "comment_vote": {}, "topic_vote": {}};
-        }
 
+      var applyAndPublish = function(data) {
         data.comment.push({
           "comment_id": data.next_comment_id,
           "body": body,
@@ -155,6 +150,34 @@
           if (res !== false) {
             $(".comment-new .comment-textarea").val("");
           }
+        });
+      };
+
+      // Data-loss guard: posting a comment is a content write. If the local read of
+      // the user's data file MISSES, do NOT fall back to a blank default and publish -
+      // on a device that has not synced this file yet that blank would overwrite the
+      // user's real comments/votes everywhere (last-writer-wins). Instead force a
+      // re-sync of this site and re-read once; only publish if the real file loads.
+      Page.cmd("fileGet", {"inner_path": inner_path, "required": false}, function(data) {
+        if (data) {
+          applyAndPublish(JSON.parse(data));
+          return;
+        }
+        // Local miss - trigger a sync, then re-read before risking a blank overwrite.
+        Page.cmd("siteUpdate", {"address": Page.site_info.address}, function() {
+          setTimeout(function() {
+            Page.cmd("fileGet", {"inner_path": inner_path, "required": false}, function(data2) {
+              if (data2) {
+                // The file synced in - use the real data, never clobber.
+                applyAndPublish(JSON.parse(data2));
+              } else {
+                // Still absent after a sync attempt. Abort rather than overwrite the
+                // user's (possibly not-yet-synced) data with a blank default.
+                $(".comment-new .button-submit").removeClass("loading");
+                Page.cmd("wrapperNotification", ["info", "Your data is still syncing, please try again in a moment."]);
+              }
+            });
+          }, 2000);
         });
       });
     }

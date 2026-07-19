@@ -707,13 +707,8 @@
       elem.toggleClass("active").addClass("loading");
       var user_dir = Page.site_info.xid_directory || this.site_info.auth_address;
       var inner_path = "data/users/" + user_dir + "/data.json";
-      Page.cmd("fileGet", {"inner_path": inner_path, "required": false}, function(data) {
-        if (data) {
-          data = JSON.parse(data);
-        } else {
-          data = {"next_comment_id": 1, "comment": [], "comment_vote": {}, "post_vote": {}};
-        }
 
+      var applyAndPublish = function(data) {
         if (!data.post_vote) {
           data.post_vote = {};
         }
@@ -737,6 +732,36 @@
         Page.writePublish(inner_path, btoa(json_raw), function(res) {
           elem.removeClass("loading");
           self.log("Writepublish result", res);
+        });
+      };
+
+      var abortSync = function() {
+        // Revert the optimistic UI toggle and stop - do not overwrite an unsynced
+        // data file with a blank default.
+        elem.toggleClass("active").removeClass("loading");
+        Page.cmd("wrapperNotification", ["info", "Your data is still syncing, please try again in a moment."]);
+      };
+
+      // Data-loss guard: voting is a content write. If the local read of the user's
+      // data file MISSES, do NOT fall back to a blank default and publish - on a device
+      // that has not synced this file yet that blank would wipe the user's real votes
+      // and comments everywhere (last-writer-wins). Force a re-sync + re-read first;
+      // only publish if the real file loads, otherwise abort and let the user retry.
+      Page.cmd("fileGet", {"inner_path": inner_path, "required": false}, function(data) {
+        if (data) {
+          applyAndPublish(JSON.parse(data));
+          return;
+        }
+        Page.cmd("siteUpdate", {"address": Page.site_info.address}, function() {
+          setTimeout(function() {
+            Page.cmd("fileGet", {"inner_path": inner_path, "required": false}, function(data2) {
+              if (data2) {
+                applyAndPublish(JSON.parse(data2));
+              } else {
+                abortSync();
+              }
+            });
+          }, 2000);
         });
       });
       return false;
