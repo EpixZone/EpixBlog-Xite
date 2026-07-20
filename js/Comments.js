@@ -37,19 +37,19 @@
       if (!cb) cb = false;
       var self = this;
       var query = "SELECT comment.*, json_content.json_id AS content_json_id, keyvalue.value AS cert_user_id, json.directory, " +
-        "(SELECT COUNT(*) FROM comment_vote WHERE comment_vote.comment_uri = comment.comment_id || '@' || json.directory)+1 AS votes " +
+        "(SELECT COUNT(*) FROM comment_vote WHERE comment_vote.comment_uri = comment.post_id || '@' || json.directory)+1 AS votes " +
         "FROM comment " +
         "LEFT JOIN json USING (json_id) " +
         "LEFT JOIN json AS json_content ON (json_content.directory = json.directory AND json_content.file_name='content.json') " +
         "LEFT JOIN keyvalue ON (keyvalue.json_id = json_content.json_id AND key = 'cert_user_id') " +
-        "WHERE post_id = " + this.post_id + " ORDER BY date_added DESC";
+        "WHERE comment.blog_post_id = " + this.post_id + " ORDER BY date_added DESC";
 
       Page.cmd("dbQuery", query, function(comments) {
         $("#Comments_header").text(comments.length + (comments.length > 1 ? " Comments:" : " Comment:"));
         for (var i = 0; i < comments.length; i++) {
           var comment = comments[i];
           var user_address = comment.directory.replace("users/", "");
-          var comment_address = comment.comment_id + "_" + user_address;
+          var comment_address = comment.post_id + "_" + user_address;
           var elem = $("#comment_" + comment_address);
           if (elem.length === 0) {
             elem = $(".comment.template").clone().removeClass("template").attr("id", "comment_" + comment_address).data("post_id", self.post_id);
@@ -95,7 +95,7 @@
       $(".added", elem).text(Time.since(comment.date_added)).attr("title", Time.date(comment.date_added, "long"));
       // Add inline editor
       if (user_address === (Page.site_info.xid_directory || Page.site_info.auth_address)) {
-        $(elem).attr("data-object", "Comment:" + comment.comment_id).attr("data-deletable", "yes");
+        $(elem).attr("data-object", "Comment:" + comment.post_id).attr("data-deletable", "yes");
         $(".comment-body", elem).attr("data-editable", "body").data("content", comment.body);
       }
     }
@@ -127,35 +127,31 @@
       }
 
       $(".comment-new .button-submit").addClass("loading");
-      var user_dir = Page.site_info.xid_directory || Page.site_info.auth_address;
-      var inner_path = "data/users/" + user_dir + "/data.json";
-      Page.cmd("fileGet", {"inner_path": inner_path, "required": false}, function(data) {
-        if (data) {
-          data = JSON.parse(data);
-        } else {
-          data = {"next_comment_id": 1, "comment": [], "comment_vote": {}, "topic_vote": {}};
-        }
 
-        data.comment.push({
-          "comment_id": data.next_comment_id,
-          "body": body,
-          "post_id": self.post_id,
-          "date_added": Time.timestamp()
-        });
-        data.next_comment_id += 1;
-        var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')));
-        Page.writePublish(inner_path, btoa(json_raw), function(res) {
-          $(".comment-new .button-submit").removeClass("loading");
+      // A comment is a brand-new signed record (nonce-based unique id). The node
+      // fills author + post_id + sign, then UNION-merges it into comments.json,
+      // so this can never overwrite another comment - the old blank-default sync
+      // guard is gone.
+      var record = {
+        "nonce": Page.randNonce(),
+        "clock": Date.now(),
+        "supersedes": 0,
+        "deleted": false,
+        "blog_post_id": self.post_id,
+        "body": body,
+        "date_added": Time.timestamp()
+      };
+      Page.saveRecord("comments.json", record, function(res) {
+        $(".comment-new .button-submit").removeClass("loading");
+        User.checkCert("updaterules");
+        self.log("submitComment result", res);
+        if (res === true) {
+          $(".comment-new .comment-textarea").val("");
           self.loadComments();
           setTimeout(function() {
             Page.loadLastcomments();
           }, 1000);
-          User.checkCert("updaterules");
-          self.log("Writepublish result", res);
-          if (res !== false) {
-            $(".comment-new .comment-textarea").val("");
-          }
-        });
+        }
       });
     }
 

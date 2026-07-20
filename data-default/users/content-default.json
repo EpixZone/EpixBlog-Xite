@@ -9,7 +9,21 @@
     "permission_rules": {
       ".*": {
         "files_allowed": "data.json",
-        "max_size": 40000
+        "max_size": 40000,
+        "merge_files": {
+          "comments.json": {
+            "class": "epix-orset-1",
+            "max_size": 3000000
+          },
+          "comment_votes.json": {
+            "class": "epix-orset-1",
+            "max_size": 3000000
+          },
+          "post_votes.json": {
+            "class": "epix-orset-1",
+            "max_size": 3000000
+          }
+        }
       }
     },
     "permissions": {}
