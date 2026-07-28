@@ -3,8 +3,8 @@
  "files": {},
  "ignore": ".*",
  "inner_path": "data/users/content.json",
- "modified": 1778005625,
- "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "HOar2f2uUA3WXFsHGmFUe8kCFs/Y0zAPZhqsTT0wW8RNY6MvXcsdwDoEyVTzveCwUGXS9YJUJX415aepJBlnO9A="},
+ "modified": 1785266372,
+ "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "GwzWg/b6gqo5iCtLI+Dg9wiI0sucwqdUaRu5CEDknu+RIlybP/1LPQ6HykN3spPlvDRu3frQ/4kJv2i/TxSTFyc="},
  "user_contents": {
   "cert_signers": {
    "xid.epix": ["chain"]
@@ -12,7 +12,21 @@
   "permission_rules": {
    ".*": {
     "files_allowed": "data.json",
-    "max_size": 40000
+    "max_size": 40000,
+    "merge_files": {
+     "comment_votes.json": {
+      "class": "epix-orset-1",
+      "max_size": 3000000
+     },
+     "comments.json": {
+      "class": "epix-orset-1",
+      "max_size": 3000000
+     },
+     "post_votes.json": {
+      "class": "epix-orset-1",
+      "max_size": 3000000
+     }
+    }
    }
   },
   "permissions": {}
