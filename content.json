@@ -341,59 +341,17 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1785266368,
+ "modified": 1785365981,
  "optional": "data/video/.*mp4",
  "order_policy": {
-  "first_paint": [
-   "index.html",
-   "css/all.css",
-   "js/lib/00-jquery.min.js",
-   "js/lib/jquery.csslater.js",
-   "js/lib/jquery.cssanim.js",
-   "js/lib/highlight.min.js",
-   "js/lib/marked.min.js",
-   "js/lib/zoom.min.js",
-   "js/lib/pnglib.js",
-   "js/lib/identicon.js",
-   "js/lib/epixframe.js",
-   "js/utils/LogMixin.js",
-   "js/utils/RateLimit.js",
-   "js/utils/Time.js",
-   "js/utils/Text.js",
-   "js/utils/Translate.js",
-   "js/utils/Menu.js",
-   "js/utils/Meditor.js",
-   "js/utils/CustomAlloyEditor.js",
-   "js/utils/InlineEditor.js",
-   "js/utils/User.js",
-   "js/utils/Follow.js",
-   "js/Comments.js",
-   "js/EpixBlog.js",
-   "data/data.json"
-  ],
-  "prefetch": [
-   "alloy-editor/all.js",
-   "alloy-editor/all.css",
-   "img/eblog.png"
-  ]
+  "first_paint": ["index.html","css/all.css","js/lib/00-jquery.min.js","js/lib/jquery.csslater.js","js/lib/jquery.cssanim.js","js/lib/highlight.min.js","js/lib/marked.min.js","js/lib/zoom.min.js","js/lib/pnglib.js","js/lib/identicon.js","js/lib/epixframe.js","js/utils/LogMixin.js","js/utils/RateLimit.js","js/utils/Time.js","js/utils/Text.js","js/utils/Translate.js","js/utils/Menu.js","js/utils/Meditor.js","js/utils/CustomAlloyEditor.js","js/utils/InlineEditor.js","js/utils/User.js","js/utils/Follow.js","js/Comments.js","js/EpixBlog.js","data/data.json"],
+  "prefetch": ["alloy-editor/all.js","alloy-editor/all.css","img/eblog.png"]
  },
  "postmessage_nonce_security": true,
  "signers_sign": "HCw3hYH2z0TJPlNJsBMIptwXsXm78VOSetRIFv1EojQlQih7CK+icYj20pLBPbo6yix18QtuGyIOLoZ93rNs2yI=",
- "signs": {
-  "epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "HAiKL6BZGXhgyfZVAhE6X1dEedJiU5rVjpDjPV70f8TfMIcnPxRFWlvR2a3sMYaNTqHy0KUfeem69Q8FuCJ69p8="
- },
+ "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "HG9t3olapHb1DweHqPlhjEquVg69YwB4bJbSPTs+eAkOOVG8sLX3DDTzFY/NrpwYrCPY5OiATi7P5jO3XFKsD9Q="},
  "signs_required": 1,
  "title": "Epix Blog",
- "translate": [
-  "index.html",
-  "js/EpixBlog.js",
-  "js/Comments.js",
-  "js/utils/User.js",
-  "js/utils/Translate.js",
-  "js/utils/Text.js",
-  "js/utils/InlineEditor.js",
-  "js/utils/Follow.js",
-  "alloy-editor/all.js"
- ],
+ "translate": ["index.html","js/EpixBlog.js","js/Comments.js","js/utils/User.js","js/utils/Translate.js","js/utils/Text.js","js/utils/InlineEditor.js","js/utils/Follow.js","alloy-editor/all.js"],
  "viewport": "width=device-width, initial-scale=0.8"
 }
