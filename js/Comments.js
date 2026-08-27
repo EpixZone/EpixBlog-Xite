@@ -50,7 +50,7 @@
           var comment = comments[i];
           var user_address = comment.directory.replace("users/", "");
           var comment_address = comment.post_id + "_" + user_address;
-          var elem = $("#comment_" + comment_address);
+          var elem = $(document.getElementById("comment_" + comment_address));
           if (elem.length === 0) {
             elem = $(".comment.template").clone().removeClass("template").attr("id", "comment_" + comment_address).data("post_id", self.post_id);
             if (type !== "noanim") {
