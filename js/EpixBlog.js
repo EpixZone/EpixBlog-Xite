@@ -129,8 +129,13 @@
     applyLastcommentdata(elem, lastcomment) {
       var user_address = lastcomment.directory.replace("users/", "");
       var resolve_address = user_address;
-      if (user_address === Page.site_info.xid_directory) {
-        resolve_address = Page.site_info.auth_address;
+      // site_info only tells us whether this comment is our own, which is a
+      // display detail. Without it, still render the comment rather than
+      // throwing: the row is already in the page by this point, so throwing
+      // leaves whatever the template held standing as if it were a comment.
+      var site_info = Page.site_info || {};
+      if (user_address === site_info.xid_directory) {
+        resolve_address = site_info.auth_address;
       }
       User.resolveXidName(resolve_address, function(name, tld, avatar) {
         elem.find(".comment-avatar").remove();
@@ -485,7 +490,13 @@
             });
             translateDOM();
           });
-          self.loadLastcomments("noanim");
+          // Depends on site_info (it compares each commenter against our own
+          // xid_directory), so it has to wait for siteInfo to land. Issued
+          // alongside it, this dbQuery beat it on a fast node and rendered
+          // comment rows against a null site_info.
+          $.when(self.event_site_info).done(function() {
+            self.loadLastcomments("noanim");
+          });
         });
       });
     }

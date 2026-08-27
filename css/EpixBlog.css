@@ -98,6 +98,8 @@ a:hover { color: #3498db }
 .lastcomments h3 { margin-top: 20px; margin-left: 15px; }
 .lastcomments .lastcomment { font-size: 85%; margin-top: 20px; margin-bottom: 30px; margin-left: 20px; overflow: hidden; padding-right: 15px; }
 .lastcomments .lastcomment .user_name { font-weight: bold; }
+/* Same avatar in the sidebar, which runs at 85% - scale it to match. */
+.lastcomments .lastcomment .comment-avatar { width: 16px; height: 16px; margin-right: 4px; vertical-align: -3px }
 .lastcomments .lastcomment .details { font-size: 90%; }
 .lastcomments .lastcomment .details .at { color: #999 }
 .lastcomments .lastcomment .details .postlink { border-bottom: 1px solid #BBB; }

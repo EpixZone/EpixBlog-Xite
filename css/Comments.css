@@ -1,6 +1,15 @@
 .comments { margin-bottom: 60px }
 .comment { background-color: white; padding: 25px 0px; margin: 1px; border-top: 1px solid #EEE }
 .comment .user_name { font-size: 14px; font-weight: bold }
+/* Inserted by JS beside a commenter's name, from a source whose dimensions
+   we do not control, so it is constrained here. Unstyled it rendered at the
+   image's intrinsic size and swamped the comment. object-fit keeps a
+   non-square avatar from stretching. */
+.comment-avatar {
+	width: 20px; height: 20px; border-radius: 100%; object-fit: cover;
+	margin-right: 6px; vertical-align: -5px; background-color: #F0F0F0;
+	image-rendering: pixelated;
+}
 .comment .added { color: #AAA }
 .comment .reply { color: #CCC; opacity: 0; transition: opacity 0.3s; border: none; position: relative; }
 .comment:hover .reply { opacity: 1 }

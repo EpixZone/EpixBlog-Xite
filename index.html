@@ -73,12 +73,16 @@
   <div class="lastcomments">
    <h3>Latest comments:</h3>
    <ul>
+    <!-- Cloned per comment, then filled in by applyLastcommentdata. Every
+         slot is left empty on purpose: a clone is inserted before its data
+         is applied, so any placeholder here is what a reader sees if that
+         fails. It must never look like something a person actually said. -->
     <li class="lastcomment template">
-     <span class="user_name">nofish:</span>
-     <span class="body">WebGL under linux can be problematic, here is some tips...</span>
+     <span class="user_name"></span>
+     <span class="body"></span>
      <div class="details">
       <span class="at">@</span>
-      <a class="postlink" href="#">Changelog, August 16, 2015</a>
+      <a class="postlink" href="#"></a>
      </div>
     </li>
    </ul>
