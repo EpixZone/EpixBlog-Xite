@@ -89,6 +89,9 @@
           if (self.data.description) $(".left h2").html(Text.renderMarked(self.data.description)).data("content", self.data.description);
           if (self.data.links) $(".left .links").html(Text.renderMarked(self.data.links)).data("content", self.data.links);
         }
+        // Re-evaluate against the data that just loaded, so a bar shown
+        // from a stale mid-update read converges instead of sticking.
+        self.checkPublishbar();
       });
     }
 
@@ -362,7 +365,13 @@
     }
 
     checkPublishbar() {
-      if (this.data != null && (!this.data["modified"] || this.data["modified"] > this.site_info.content.modified)) {
+      // Only a session that can actually sign gets the bar. It used to show
+      // for plain visitors too: every siteInfo event re-ran this check, and
+      // mid-update the freshly rebuilt db (new data.json "modified" stamp)
+      // races the siteInfo still carrying the previous content.json stamp,
+      // so the condition flipped true and the bar stuck until the next event.
+      var can_sign = this.site_info && (this.site_info.settings.own || this.site_info.privatekey);
+      if (can_sign && this.data != null && (!this.data["modified"] || this.data["modified"] > this.site_info.content.modified)) {
         $(".publishbar").addClass("visible");
       } else {
         $(".publishbar").removeClass("visible");
