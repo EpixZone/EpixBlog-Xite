@@ -1,8 +1,8 @@
 {
  "address": "epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f",
  "address_index": 65083614,
- "background-color": "white",
- "background-color-dark": "#30363c",
+ "background-color": "#F6F6F9",
+ "background-color-dark": "#09090A",
  "bundles": {
   "1c23c171ded271357a6a41448db3a4c089ee696e49c8b99e89cc1764b3992173": {
    "seq": 0,
@@ -33,6 +33,7 @@
  "domain": "blog.epix",
  "edx": 1,
  "epixnet_version": "0.3.28",
+ "favicon": "img/favicon.ico",
  "files": {
   "LICENSE": {
    "b3": "e5d78c01bf8de96db29343a9f6771e6eaf18b2392057cea340d985e9e75fb264",
@@ -344,8 +345,8 @@
  "modified": 1785365981,
  "optional": "data/video/.*mp4",
  "order_policy": {
-  "first_paint": ["index.html","css/all.css","js/lib/00-jquery.min.js","js/lib/jquery.csslater.js","js/lib/jquery.cssanim.js","js/lib/highlight.min.js","js/lib/marked.min.js","js/lib/zoom.min.js","js/lib/pnglib.js","js/lib/identicon.js","js/lib/epixframe.js","js/utils/LogMixin.js","js/utils/RateLimit.js","js/utils/Time.js","js/utils/Text.js","js/utils/Translate.js","js/utils/Menu.js","js/utils/Meditor.js","js/utils/CustomAlloyEditor.js","js/utils/InlineEditor.js","js/utils/User.js","js/utils/Follow.js","js/Comments.js","js/EpixBlog.js","data/data.json"],
-  "prefetch": ["alloy-editor/all.js","alloy-editor/all.css","img/eblog.png"]
+  "first_paint": ["index.html","css/all.css","js/lib/00-jquery.min.js","js/lib/jquery.csslater.js","js/lib/jquery.cssanim.js","js/lib/highlight.min.js","js/lib/marked.min.js","js/lib/zoom.min.js","js/lib/pnglib.js","js/lib/identicon.js","js/lib/epixframe.js","js/utils/LogMixin.js","js/utils/RateLimit.js","js/utils/Time.js","js/utils/Text.js","js/utils/Translate.js","js/utils/Menu.js","js/utils/Meditor.js","js/utils/CustomAlloyEditor.js","js/utils/InlineEditor.js","js/utils/User.js","js/utils/Follow.js","js/Comments.js","js/EpixBlog.js","img/logo.svg","img/avatar.svg","data/data.json"],
+  "prefetch": ["alloy-editor/all.js","alloy-editor/all.css","img/favicon.ico"]
  },
  "postmessage_nonce_security": true,
  "signers_sign": "HCw3hYH2z0TJPlNJsBMIptwXsXm78VOSetRIFv1EojQlQih7CK+icYj20pLBPbo6yix18QtuGyIOLoZ93rNs2yI=",
