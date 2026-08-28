@@ -128,7 +128,7 @@
     showXidFab() {
       var self = this;
       $(".xid-fab, .xid-tag").remove();
-      var fab = $('<a href="#" class="xid-fab nolink" style="background: linear-gradient(135deg, #e67e22, #f39c12); display: inline-block; padding: 6px 12px; color: #fff; font-size: 14px; text-transform: uppercase; font-family: consolas, menlo, monospace; text-decoration: none; cursor: pointer; box-shadow: 0 2px 8px rgba(243,156,18,0.4); border-radius: 3px; margin-left: 10px;" title="Register xID">xID</a>');
+      var fab = $('<a href="#" class="xid-fab nolink" style="background: #F0B622; display: inline-block; padding: 6px 12px; color: #09090A; font-size: 14px; text-transform: uppercase; font-family: consolas, menlo, monospace; text-decoration: none; cursor: pointer; border-radius: 8px; margin-left: 10px;" title="Register xID">xID</a>');
       fab.on("click", function(e) {
         e.preventDefault();
         self.triggerCertXid();
@@ -145,17 +145,16 @@
       }
       var hue = hash % 360;
       var bgColor = "hsl(" + hue + ", 50%, 25%)";
-      var bgColor2 = "hsl(" + hue + ", 40%, 18%)";
       var textColor = "hsl(" + hue + ", 80%, 80%)";
       var avatar = this.xid_avatar;
       var tag;
       if (avatar) {
-        tag = $('<a href="#" class="xid-tag nolink" style="display: inline-block; padding: 4px 10px; background: linear-gradient(135deg, ' + bgColor + ', ' + bgColor2 + '); box-shadow: 0 2px 8px rgba(0,0,0,0.3); cursor: pointer; text-decoration: none; border-radius: 3px; margin-left: 10px; vertical-align: middle;">' +
+        tag = $('<a href="#" class="xid-tag nolink" style="display: inline-block; padding: 4px 10px; background: ' + bgColor + '; cursor: pointer; text-decoration: none; border-radius: 8px; margin-left: 10px; vertical-align: middle;">' +
           '<img src="' + avatar + '" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid ' + textColor + '; vertical-align: middle; margin-right: 4px;" onerror="this.style.display=\'none\'">' +
           '<span style="color: ' + textColor + '; font-size: 12px; font-family: consolas, menlo, monospace;">' + display + '</span>' +
           '</a>');
       } else {
-        tag = $('<a href="#" class="xid-tag nolink" style="display: inline-block; padding: 6px 12px; background: linear-gradient(135deg, ' + bgColor + ', ' + bgColor2 + '); box-shadow: 0 2px 8px rgba(0,0,0,0.3); cursor: pointer; text-decoration: none; border-radius: 3px; margin-left: 10px;">' +
+        tag = $('<a href="#" class="xid-tag nolink" style="display: inline-block; padding: 6px 12px; background: ' + bgColor + '; cursor: pointer; text-decoration: none; border-radius: 8px; margin-left: 10px;">' +
           '<span style="color: ' + textColor + '; font-size: 12px; font-family: consolas, menlo, monospace;">' + display + '</span>' +
           '</a>');
       }

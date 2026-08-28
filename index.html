@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
 <head>
  <title>Epix Blog</title>
  <meta charset="utf-8">
  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
- <link rel="stylesheet" href="css/all.css" />
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <link rel="icon" href="img/favicon.ico">
+ <link rel="stylesheet" href="css/all.css?v={site_modified}" />
  <base href="" target="_top" id="base">
  <script>base.href = document.location.href.replace("/media", "").replace("index.html", "").replace(/[&?]wrapper=False/, "").replace(/[&?]wrapper_nonce=[A-Za-z0-9]+/, "")</script>
 
@@ -15,6 +17,7 @@
 <!-- Loading overlay -->
 <div class="loading-overlay" id="loading-overlay">
  <div class="loading-box">
+  <img src="img/logo.svg" class="loading-logo" alt="">
   <div class="loading-title">Epix Blog</div>
   <div class="loading-bar-track">
    <div class="loading-bar-fill" id="loading-bar-fill"></div>
@@ -56,11 +59,13 @@
 <!-- EOF publishbar -->
 
 
+<div class="shell">
+
 <!-- left -->
 <div class="left" data-object="Site">
  <a href="#Show+more" class="left-more-link"></a>
  <a href="?Home" class="nolink avatar-link">
-    <img class="avatar" src="img/eblog.png">
+    <img class="avatar" src="img/avatar.svg" alt="">
  </a>
  <h1><a href="?Home" class="nolink" data-editable="title" data-editable-mode="simple"></a></h1>
  <a href="#Follow" class="feed-follow"><span class='text-follow'>Follow in Newsfeed</span><span class='text-following'>Following</span><div class="icon-feed"></div></a>
@@ -181,8 +186,8 @@
 </div>
 <!-- EOF right -->
 
-
-<div style="clear: both"></div>
+</div>
+<!-- EOF shell -->
 
 
 <!-- Template: menu -->
