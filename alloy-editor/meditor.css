@@ -1,30 +1,221 @@
+/* ---- meditor.css: Epix Blog editor chrome + theme layer ----
+   Loaded (merged into alloy-editor/all.css) only when editing starts, AFTER
+   the page stylesheet, so the kit tokens (var(--epix-*)) are available and
+   flip automatically with body.theme-dark. This file sorts last in the merge
+   (alloy-editor-ocean < easymde.min < editor < meditor), so equal-specificity
+   rules here win ties against the vendored skins.
+   Structural contracts (do not break): .meditor z-index 999 + relative keeps
+   the editor above .editbg (500); toolbars keep JS-set inline left/top;
+   .meditor-markdown keeps overflow:hidden + box-sizing for the autoHeight
+   fallback; .ae-container-edit-link-target stays dead. */
+
 .meditor { z-index: 999; position: relative; }
+
+/* Mode toggle: absolute (not floated) so it never disturbs the first line.
+   Sits above the editable, right-aligned; .markdown = markdown mode active. */
 .meditor-editmode {
-	float: right; font-family: monospace; border: none; font-weight: normal; font-size: 12px; z-index: 999; position: relative;
-	padding: 5px; border: 1px solid #d2d0d0; border-radius: 5px; transition: all 0.3s; margin-top: -38px;
+	position: absolute; top: -40px; right: 0; z-index: 999;
+	display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px;
+	font-family: var(--epix-font-mono); font-size: 12px; font-weight: normal; white-space: nowrap;
+	color: var(--epix-text-mid); background-color: var(--epix-surface);
+	border: 1px solid var(--epix-border-strong); border-radius: var(--epix-radius-md);
+	text-decoration: none; transition: color 0.15s, border-color 0.15s, background-color 0.15s;
 }
-.meditor-editmode:hover { border-color: #b381bb; transition: none; color: #333; }
-.meditor-editmode:focus { transition: all 0.3s; }
-.meditor-editmode.markdown { border-color: #9C27B0; background-color: #9C27B0; color: white; }
+.meditor-editmode:hover { color: var(--epix-accent-text); border-color: var(--epix-accent-text); transition: none; text-decoration: none }
+.meditor-editmode:focus { outline: none }
+.meditor-editmode:focus-visible { outline: 2px solid var(--epix-focus); outline-offset: 2px }
+.meditor-editmode.markdown { background-color: var(--epix-cyan); border-color: var(--epix-cyan); color: var(--epix-ink-strong) }
+
+/* Markdown surface. The plain textarea is the no-EasyMDE fallback: keep
+   overflow:hidden + box-sizing:border-box + no height rules (autoHeight
+   math), width:100% of the px-snapshotted clone. */
 .meditor-markdown {
-	width: 100%; font-family: monospace; font-size: 14px; line-height: 1.6; box-sizing: border-box; padding: 10px;
-    border: 1px solid #bbb; border-radius: 3px; box-shadow: inset 0px 4px 5px -5px rgba(0, 0, 0, 0.4); overflow: hidden;
+	width: 100%; font-family: var(--epix-font-mono); font-size: 13.5px; line-height: 1.6;
+	box-sizing: border-box; padding: 12px 14px; overflow: hidden;
+	color: var(--epix-text); background-color: var(--epix-surface);
+	border: 1px solid var(--epix-border-strong); border-radius: var(--epix-radius-md);
+}
+.meditor-markdown:focus { border-color: var(--epix-focus); outline: none }
+
+/* ---- EasyMDE (markdown mode with the formatting toolbar) ---- */
+
+.EasyMDEContainer { margin: 0 }
+.EasyMDEContainer .CodeMirror,
+.EasyMDEContainer .CodeMirror pre.CodeMirror-line,
+.EasyMDEContainer .CodeMirror pre.CodeMirror-line-like,
+.EasyMDEContainer .CodeMirror-measure,
+.EasyMDEContainer .CodeMirror-measure pre {
+	font: 13.5px/1.6 var(--epix-font-mono) !important;
+}
+/* height:auto + viewportMargin Infinity (set in Meditor.js): the editor grows
+   with the post and the window stays the scroll container */
+.EasyMDEContainer .CodeMirror {
+	height: auto; min-height: 280px; padding: 8px 6px;
+	border-radius: 0 0 var(--epix-radius-md) var(--epix-radius-md);
+	background: var(--epix-surface); color: var(--epix-text); border-color: var(--epix-border-strong);
+}
+.EasyMDEContainer .editor-toolbar {
+	position: sticky; top: 0; z-index: 5; opacity: 1;
+	border-radius: var(--epix-radius-md) var(--epix-radius-md) 0 0;
+	background: var(--epix-surface-2); border-color: var(--epix-border-strong);
+	display: flex; flex-wrap: nowrap; align-items: center; padding: 4px 6px; overflow-x: auto;
+}
+.EasyMDEContainer .editor-toolbar button {
+	color: var(--epix-text-mid); width: 30px; height: 30px; display: inline-flex; align-items: center;
+	justify-content: center; margin: 0 1px; padding: 0; border-radius: var(--epix-radius-sm);
+	border: 1px solid transparent; font-size: 14px; flex: none; cursor: pointer;
+}
+.EasyMDEContainer .editor-toolbar button:hover, .EasyMDEContainer .editor-toolbar button.active {
+	background: var(--epix-surface); border-color: var(--epix-border); color: var(--epix-text)
+}
+.EasyMDEContainer .editor-toolbar button:focus-visible { outline: 2px solid var(--epix-focus); outline-offset: 1px }
+.EasyMDEContainer .editor-toolbar i.separator {
+	display: inline-block; width: 1px; height: 18px; margin: 0 4px;
+	border-left: 1px solid var(--epix-border-strong); border-right: none; vertical-align: middle
+}
+.EasyMDEContainer .editor-preview { background: var(--epix-surface); color: var(--epix-text) }
+.EasyMDEContainer .CodeMirror-cursor { border-left-color: var(--epix-text) }
+.EasyMDEContainer .CodeMirror-selected { background: var(--epix-border) }
+.EasyMDEContainer .CodeMirror-placeholder { color: var(--epix-text-low) !important; opacity: 1 }
+
+/* ---- AlloyEditor (rich text mode) theme: one dark bubble in both themes,
+        an identity moment like the wrapper's own chrome ---- */
+
+/* selection highlight inside the editable */
+.ae-editable ::-moz-selection { background: var(--epix-accent-soft) !important }
+.ae-editable ::selection { background: var(--epix-accent-soft) !important }
+
+/* floating bubbles: selection toolbar, expanded + row, link editor */
+.ae-ui .ae-toolbar, .ae-ui [class^=ae-toolbar-] {
+	background-color: var(--epix-neutral-9); color: var(--epix-neutral-1);
+	border-radius: var(--epix-radius-md); font-family: var(--epix-font-sans);
+	/* ring, not border: a real border would shift the JS-measured position */
+	box-shadow: 0 0 0 1px var(--epix-neutral-7), var(--epix-shadow);
+	z-index: 999;
+}
+/* pointer wedge: fill matches the bubble, ::before draws the 1px ring edge */
+.ae-ui .ae-arrow-box.ae-arrow-box-bottom:after, .ae-ui .ae-arrow-box.ae-arrow-box-top:after,
+.ae-ui .ae-arrow-box.ae-arrow-box-top-left:after, .ae-ui .ae-arrow-box.ae-arrow-box-top-right:after,
+.ae-ui .ae-arrow-box.ae-arrow-box-left:after, .ae-ui .ae-arrow-box.ae-arrow-box-right:after { color: var(--epix-neutral-9) }
+.ae-ui .ae-arrow-box.ae-arrow-box-bottom:before {
+	content: ''; position: absolute; margin: auto; left: 0; right: 0; top: 100%; height: 0; width: 0;
+	border-left: 6px solid transparent; border-right: 6px solid transparent;
+	border-top: 5px solid var(--epix-neutral-7);
+}
+.ae-ui .ae-arrow-box.ae-arrow-box-top:before {
+	content: ''; position: absolute; margin: auto; left: 0; right: 0; top: -5px; height: 0; width: 0;
+	border-left: 6px solid transparent; border-right: 6px solid transparent;
+	border-bottom: 5px solid var(--epix-neutral-7);
+}
+.ae-ui .ae-dropdown.ae-arrow-box:before, .ae-ui [class^=ae-dropdown-].ae-arrow-box:before { display: none }
+
+/* On the dark canvas the neutral-7 ring nearly vanishes; step it up a notch */
+.theme-dark .ae-ui .ae-toolbar, .theme-dark .ae-ui [class^=ae-toolbar-] { box-shadow: 0 0 0 1px var(--epix-neutral-6), var(--epix-shadow) }
+.theme-dark .ae-ui .ae-arrow-box.ae-arrow-box-bottom:before { border-top-color: var(--epix-neutral-6) }
+.theme-dark .ae-ui .ae-arrow-box.ae-arrow-box-top:before { border-bottom-color: var(--epix-neutral-6) }
+@media (prefers-color-scheme: dark) {
+	body:not(.theme-light) .ae-ui .ae-toolbar, body:not(.theme-light) .ae-ui [class^=ae-toolbar-] { box-shadow: 0 0 0 1px var(--epix-neutral-6), var(--epix-shadow) }
+	body:not(.theme-light) .ae-ui .ae-arrow-box.ae-arrow-box-bottom:before { border-top-color: var(--epix-neutral-6) }
+	body:not(.theme-light) .ae-ui .ae-arrow-box.ae-arrow-box-top:before { border-bottom-color: var(--epix-neutral-6) }
 }
 
-.ae-icon-h2:before { content: "T"; display: inline-block; line-height: 0px; vertical-align: 3px; font-size: 23px; font-family: serif; }
-.ae-icon-h3:before { content: "T"; display: inline-block; line-height: 0px; vertical-align: 4px; font-size: 16px; font-family: serif; }
-
+/* bubble buttons */
 .ae-button:focus { outline: none }
-.ae-ui .ae-toolbar-styles, .ae-ui .ae-toolbar-add, .ae-ui .ae-toolbar { z-index: 999 }
+.ae-ui .ae-toolbar .ae-button, .ae-ui [class^=ae-toolbar-] .ae-button { border-radius: var(--epix-radius-sm) }
+.ae-ui .ae-toolbar .ae-button:hover, .ae-ui .ae-toolbar .ae-toolbar-element:hover,
+.ae-ui [class^=ae-toolbar-] .ae-button:hover, .ae-ui [class^=ae-toolbar-] .ae-toolbar-element:hover {
+	color: var(--epix-cyan); background-color: var(--epix-neutral-7);
+}
+.ae-ui .ae-toolbar .ae-button.ae-button-pressed, .ae-ui .ae-toolbar .ae-toolbar-element.ae-button-pressed,
+.ae-ui [class^=ae-toolbar-] .ae-button.ae-button-pressed, .ae-ui [class^=ae-toolbar-] .ae-toolbar-element.ae-button-pressed {
+	background-color: var(--epix-neutral-7); color: var(--epix-cyan);
+}
+.ae-ui .ae-toolbar .ae-button.ae-button-pressed:hover,
+.ae-ui [class^=ae-toolbar-] .ae-button.ae-button-pressed:hover { color: var(--epix-cyan) }
+.ae-ui .ae-toolbar .ae-button:focus-visible,
+.ae-ui [class^=ae-toolbar-] .ae-button:focus-visible { outline: 2px solid var(--epix-cyan); outline-offset: 1px }
 
-.ae-icon-inlinecode { font-family: monospace; font-size: 10px; word-break: break-all; line-height: 9px; padding: 4px; }
-.ae-icon-inlinecode:before { content: "0101"; }
-.ae-ui .ae-toolbar-add { transition: top 0.3s, opacity 0.3s; opacity: 0 !important; }
-.ae-ui .ae-toolbar-add.emptyline, .ae-ui .ae-toolbar-add:hover { opacity: 1 !important; }
-.ae-container-edit-link-target { display: none !important; }
-.cke_editable { outline: none; }
+/* heading buttons: clear labels instead of two sizes of serif T */
+.ae-icon-h2:before { content: "H2"; display: inline-block; font-family: var(--epix-font-sans); font-size: 12px; font-weight: 700; line-height: 24px; letter-spacing: 0 }
+.ae-icon-h3:before { content: "H3"; display: inline-block; font-family: var(--epix-font-sans); font-size: 11px; font-weight: 700; line-height: 24px; letter-spacing: 0 }
 
-h2.empty:before { content: "Heading"; color: #DDD; position: absolute; pointer-events: none; }
-h3.empty:before { content: "Sub-Heading"; color: #DDD; position: absolute; pointer-events: none; }
+/* the + insert button: brand cyan circle; faint when the caret is on a
+   non-empty line (lineselected) so it stays discoverable, full on empty
+   lines and hover (the classes come from CustomAlloyEditor.js) */
+.ae-ui .ae-toolbar-add {
+	background-color: var(--epix-cyan); color: var(--epix-ink-strong); border-radius: 12px;
+	box-shadow: 0 0 0 1px rgba(2, 2, 2, 0.18);
+	transition: top 0.3s, opacity 0.3s, background-color 0.15s, color 0.15s; opacity: 0 !important;
+}
+/* caret on a non-empty line: quiet gray + at FULL opacity (a translucent
+   cyan fails the 3:1 affordance bar); empty line and hover go full cyan */
+.ae-ui .ae-toolbar-add.lineselected {
+	opacity: 1 !important; background-color: var(--epix-surface); color: var(--epix-text-low);
+	box-shadow: 0 0 0 1px var(--epix-border-strong);
+}
+.ae-ui .ae-toolbar-add.emptyline, .ae-ui .ae-toolbar-add:hover,
+.ae-ui .ae-toolbar-add.lineselected:hover {
+	opacity: 1 !important; background-color: var(--epix-cyan); color: var(--epix-ink-strong);
+	box-shadow: 0 0 0 1px rgba(2, 2, 2, 0.18);
+}
 
-.meditor hr:first-of-type { display: block !important; position: absolute; margin: 0px; border-bottom: 1px dashed #DEDEDE; width: 100% }
+/* link editor inside the bubble */
+.ae-ui .ae-container-input { background-color: var(--epix-neutral-8); border-radius: var(--epix-radius-sm) }
+.ae-ui .ae-container-input input, .ae-ui .ae-container-input .ae-input { color: var(--epix-neutral-1); background: transparent; font-family: var(--epix-font-sans) }
+.ae-ui .ae-container-input input::placeholder, .ae-ui .ae-container-input .ae-input::placeholder { color: var(--epix-neutral-4) }
+.ae-ui .ae-container-input input:focus, .ae-ui .ae-container-input .ae-input:focus { box-shadow: 0 0 0 2px var(--epix-cyan) }
+.ae-ui .ae-container-input .ae-icon-remove { color: var(--epix-neutral-4); font-size: 24px; line-height: 24px }
+.ae-container-edit-link-target { display: none !important }
+
+/* dropdown panels (table header picker): regular theme-aware panels */
+.ae-ui .ae-dropdown, .ae-ui [class^=ae-dropdown-] {
+	background-color: var(--epix-surface); border: 1px solid var(--epix-border);
+	border-radius: var(--epix-radius-md); box-shadow: var(--epix-shadow); color: var(--epix-text);
+}
+.ae-ui .ae-dropdown .ae-list-header, .ae-ui [class^=ae-dropdown-] .ae-list-header { color: var(--epix-text-low); font-size: small; font-style: normal }
+.ae-ui .ae-dropdown .ae-listbox .ae-toolbar-element:hover,
+.ae-ui [class^=ae-dropdown-] .ae-listbox .ae-toolbar-element:hover { background-color: var(--epix-surface-2); color: var(--epix-text) }
+.ae-ui .ae-dropdown .ae-listbox .ae-toolbar-element.active,
+.ae-ui [class^=ae-dropdown-] .ae-listbox .ae-toolbar-element.active { color: var(--epix-accent-text) }
+
+/* ---- in-editable affordances ---- */
+
+.cke_editable { outline: none }
+
+/* ghost placeholders for freshly inserted headings */
+h2.empty:before { content: "Heading"; color: var(--epix-text-low); position: absolute; pointer-events: none }
+h3.empty:before { content: "Sub-heading"; color: var(--epix-text-low); position: absolute; pointer-events: none }
+
+/* the --- read-more fold marker, visible and labeled while editing */
+.meditor hr:first-of-type {
+	display: block !important; position: absolute; margin: 0px; width: 100%;
+	border: none; border-bottom: 1px dashed var(--epix-border-strong);
+}
+.meditor hr:first-of-type:after {
+	content: "read-more fold"; position: absolute; right: 0; top: -7px;
+	font-family: var(--epix-font-sans); font-size: 10px; font-weight: 600; line-height: 14px;
+	letter-spacing: 0.08em; text-transform: uppercase; color: var(--epix-text-low);
+	background-color: var(--epix-surface); padding: 0 6px;
+}
+
+/* ---- EasyMDE toolbar icons: FontAwesome is not shipped (300KB); each
+        button gets a small currentColor SVG mask instead ---- */
+
+.EasyMDEContainer .editor-toolbar button i.fa {
+	display: inline-block; width: 16px; height: 16px; font-style: normal;
+	background-color: currentColor;
+	-webkit-mask-position: center; mask-position: center;
+	-webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+	-webkit-mask-size: 16px 16px; mask-size: 16px 16px;
+}
+.EasyMDEContainer .editor-toolbar button.bold i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4h6a4 4 0 0 1 0 8H7zM7 12h7a4 4 0 0 1 0 8H7z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4h6a4 4 0 0 1 0 8H7zM7 12h7a4 4 0 0 1 0 8H7z'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.italic i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M11 4h8M5 20h8M15 4l-6 16'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M11 4h8M5 20h8M15 4l-6 16'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.strikethrough i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M17.5 7.5c-.6-2-2.6-3.2-5.3-3.2-3 0-5 1.5-5 3.7 0 .6.1 1.1.4 1.6M6.3 16c.8 2.1 3 3.4 5.9 3.4 3.3 0 5.4-1.5 5.4-3.9 0-1-.4-1.9-1.3-2.5M4 12h16'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M17.5 7.5c-.6-2-2.6-3.2-5.3-3.2-3 0-5 1.5-5 3.7 0 .6.1 1.1.4 1.6M6.3 16c.8 2.1 3 3.4 5.9 3.4 3.3 0 5.4-1.5 5.4-3.9 0-1-.4-1.9-1.3-2.5M4 12h16'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.heading i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M6 4v16M18 4v16M6 12h12'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M6 4v16M18 4v16M6 12h12'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.quote i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M6.5 6h4.5v6.5c0 3.5-2 5.7-5.5 6l-.5-2c1.8-.4 2.8-1.5 3-3H6.5zM14.5 6H19v6.5c0 3.5-2 5.7-5.5 6l-.5-2c1.8-.4 2.8-1.5 3-3h-1.5z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M6.5 6h4.5v6.5c0 3.5-2 5.7-5.5 6l-.5-2c1.8-.4 2.8-1.5 3-3H6.5zM14.5 6H19v6.5c0 3.5-2 5.7-5.5 6l-.5-2c1.8-.4 2.8-1.5 3-3h-1.5z'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.code i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 8-4 4 4 4M15 8l4 4-4 4'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 8-4 4 4 4M15 8l4 4-4 4'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.unordered-list i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='4.5' cy='6' r='0.8'/%3E%3Ccircle cx='4.5' cy='12' r='0.8'/%3E%3Ccircle cx='4.5' cy='18' r='0.8'/%3E%3Cpath d='M9.5 6H20M9.5 12H20M9.5 18H20' fill='none'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='4.5' cy='6' r='0.8'/%3E%3Ccircle cx='4.5' cy='12' r='0.8'/%3E%3Ccircle cx='4.5' cy='18' r='0.8'/%3E%3Cpath d='M9.5 6H20M9.5 12H20M9.5 18H20' fill='none'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.ordered-list i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000' stroke='none'%3E%3Ctext x='2' y='8.5' font-size='8' font-family='sans-serif' font-weight='bold'%3E1%3C/text%3E%3Ctext x='2' y='20' font-size='8' font-family='sans-serif' font-weight='bold'%3E2%3C/text%3E%3Crect x='10' y='4.8' width='11' height='2.2' rx='1.1'/%3E%3Crect x='10' y='16.2' width='11' height='2.2' rx='1.1'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000' stroke='none'%3E%3Ctext x='2' y='8.5' font-size='8' font-family='sans-serif' font-weight='bold'%3E1%3C/text%3E%3Ctext x='2' y='20' font-size='8' font-family='sans-serif' font-weight='bold'%3E2%3C/text%3E%3Crect x='10' y='4.8' width='11' height='2.2' rx='1.1'/%3E%3Crect x='10' y='16.2' width='11' height='2.2' rx='1.1'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.link i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13.5a4.5 4.5 0 0 0 6.4 0l2.8-2.8a4.5 4.5 0 0 0-6.4-6.4L11.5 5.6'/%3E%3Cpath d='M14 10.5a4.5 4.5 0 0 0-6.4 0l-2.8 2.8a4.5 4.5 0 0 0 6.4 6.4l1.3-1.3'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13.5a4.5 4.5 0 0 0 6.4 0l2.8-2.8a4.5 4.5 0 0 0-6.4-6.4L11.5 5.6'/%3E%3Cpath d='M14 10.5a4.5 4.5 0 0 0-6.4 0l-2.8 2.8a4.5 4.5 0 0 0 6.4 6.4l1.3-1.3'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.image i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Ccircle cx='8.5' cy='10' r='1.5' fill='%23000' stroke='none'/%3E%3Cpath d='m21 15-5-5-9 9'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Ccircle cx='8.5' cy='10' r='1.5' fill='%23000' stroke='none'/%3E%3Cpath d='m21 15-5-5-9 9'/%3E%3C/svg%3E") }
+.EasyMDEContainer .editor-toolbar button.horizontal-rule i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E") }
