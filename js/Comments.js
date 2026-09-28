@@ -44,7 +44,7 @@
         "LEFT JOIN keyvalue ON (keyvalue.json_id = json_content.json_id AND key = 'cert_user_id') " +
         "WHERE comment.blog_post_id = " + this.post_id + " ORDER BY date_added DESC";
 
-      Page.cmd("dbQuery", query, function(comments) {
+      Page.queryRows(query, function(comments) {
         $("#Comments_header").text(comments.length + (comments.length > 1 ? " Comments:" : " Comment:"));
         for (var i = 0; i < comments.length; i++) {
           var comment = comments[i];

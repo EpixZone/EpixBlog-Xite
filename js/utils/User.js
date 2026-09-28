@@ -9,6 +9,10 @@
       this.xid_tld = null;
       this.xid_avatar = null;
       this.xid_loading = false;
+      this.xid_lookup = null;
+      this.xid_address = null;
+      this.xid_connecting = false;
+      this.xid_connect_callbacks = [];
       this.xid_prompt_shown = false;
     }
 
@@ -25,7 +29,7 @@
         return;
       }
       var query = "SELECT 'post_vote' AS type, post_id AS uri FROM json LEFT JOIN post_vote USING (json_id) WHERE directory = 'users/" + user_dir + "' AND file_name = 'data.json'";
-      Page.cmd("dbQuery", [query], function(votes) {
+      Page.queryRows(query, function(votes) {
         if (votes) {
           for (var i = 0; i < votes.length; i++) {
             var vote = votes[i];
@@ -52,25 +56,54 @@
       });
     }
 
+    cancelXidLookup() {
+      var lookup = this.xid_lookup;
+      this.xid_lookup = null;
+      this.xid_loading = false;
+      if (lookup) for (var callback of lookup.callbacks) callback(null, true);
+    }
+
+    // Resolve and store my own xID name
     resolveMyXidName(cb) {
-      var self = this;
-      if (this.xid_loading) {
-        if (cb) cb(this.xid_name);
+      var address = Page.site_info?.auth_address;
+      var cert = Page.site_info?.cert_user_id;
+      if (!address || !cert) {
+        this.cancelXidLookup();
+        this.xid_name = this.xid_tld = this.xid_address = null;
+        if (cb) cb(null);
         return;
       }
+      if (this.xid_lookup?.address === address && this.xid_lookup.cert === cert) {
+        if (cb) this.xid_lookup.callbacks.push(cb);
+        return;
+      }
+      this.cancelXidLookup();
+      var lookup = { address, cert, callbacks: cb ? [cb] : [] };
+      this.xid_lookup = lookup;
       this.xid_loading = true;
-      this.resolveXidName(Page.site_info.auth_address, function(name, tld, avatar) {
-        self.xid_name = name;
-        self.xid_tld = tld;
-        self.xid_avatar = avatar || "";
-        self.xid_loading = false;
-        if (cb) cb(name);
+      this.resolveXidName(address, (name, tld, avatar) => {
+        if (this.xid_lookup !== lookup) return;
+        this.xid_lookup = null;
+        this.xid_loading = false;
+        if (Page.site_info?.auth_address !== address || Page.site_info?.cert_user_id !== cert) {
+          for (var callback of lookup.callbacks) callback(null, true);
+          return;
+        }
+        this.xid_address = address;
+        this.xid_name = name;
+        this.xid_tld = tld;
+        this.xid_avatar = avatar || "";
+        for (var callback of lookup.callbacks) callback(name);
       });
     }
 
     checkCert(type) {
       var self = this;
-      if (Page.site_info.auth_address) {
+      if (!Page.site_info?.cert_user_id) {
+        this.xid_name = this.xid_tld = this.xid_address = null;
+        this.cancelXidLookup();
+      }
+      if (Page.site_info?.auth_address) {
         if (!Page.site_info.cert_user_id) {
           $(".certselect.user_name").text("Connect xID").css("color", "#f39c12");
           $(".comment-new").addClass("comment-nocert");
@@ -80,7 +113,8 @@
             this.triggerCertXid();
           }
         } else {
-          this.resolveMyXidName(function(name) {
+          this.resolveMyXidName(function(name, cancelled) {
+            if (cancelled) return;
             if (name) {
               var display = name + "." + self.xid_tld;
               $(".certselect.user_name").text(display).css("color", Text.toColor(display));
@@ -107,24 +141,39 @@
       }
     }
 
-    triggerCertXid() {
-      var self = this;
-      Page.cmd("certXid", [], function(result) {
-        if (result === "ok") {
-          self.xid_loading = false;
-          self.resolveMyXidName(function(name) {
+    triggerCertXid(cb) {
+      if (cb) this.xid_connect_callbacks.push(cb);
+      if (this.xid_connecting) return;
+      this.xid_connecting = true;
+      this.xid_prompt_shown = true;
+      var finish = (name) => {
+        var callbacks = this.xid_connect_callbacks;
+        this.xid_connect_callbacks = [];
+        this.xid_connecting = false;
+        if (name) for (var callback of callbacks) callback();
+      };
+      // The node owns identity selection and can open the picker before this
+      // page has received siteInfo. Refresh after selection instead of racing
+      // the cert_changed event with a lookup of the previous auth address.
+      Page.cmd("certXid", [], (result) => {
+        if (result !== "ok") { finish(null); return; }
+        Page.cmd("siteInfo", {}, (site_info) => {
+          if (!site_info || site_info.error) { finish(null); return; }
+          Page.setSiteinfo(site_info);
+          if (!site_info.cert_user_id) { finish(null); return; }
+          this.resolveMyXidName((name) => {
             if (name) {
-              var display = name + "." + self.xid_tld;
-              $(".certselect.user_name").text(display).css("color", Text.toColor(display));
+              var display = name + "." + this.xid_tld;
+              $(".certselect.user_name").text(display).css({"color": Text.toColor(display)});
               $(".comment-new").removeClass("comment-nocert");
               Page.cmd("wrapperNotification", ["done", "Connected as " + display]);
-              self.showXidTag(display);
+              this.showXidTag(display);
             }
+            finish(name);
           });
-        }
+        });
       });
     }
-
     showXidFab() {
       var self = this;
       $(".xid-fab, .xid-tag").remove();
@@ -162,30 +211,17 @@
     }
 
     requireXid(cb) {
-      var self = this;
-      if (!(Page.site_info && Page.site_info.auth_address)) {
-        Page.cmd("wrapperNotification", ["info", "Please connect to EpixNet first."]);
+      if (!Page.site_info?.auth_address || !Page.site_info.cert_user_id) {
+        this.triggerCertXid(cb);
         return false;
       }
-      if (this.xid_name) {
+      if (this.xid_name && this.xid_address === Page.site_info.auth_address) {
         return true;
       }
-      this.xid_loading = false;
-      this.resolveMyXidName(function(name) {
-        if (name) {
-          cb();
-        } else {
-          Page.cmd("certXid", [], function(result) {
-            if (result === "ok") {
-              self.xid_loading = false;
-              self.resolveMyXidName(function(name2) {
-                if (name2) {
-                  cb();
-                }
-              });
-            }
-          });
-        }
+      this.resolveMyXidName((name, cancelled) => {
+        if (cancelled) return;
+        if (name) cb();
+        else this.triggerCertXid(cb);
       });
       return false;
     }
