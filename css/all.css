@@ -229,6 +229,9 @@ input.text:focus, textarea:focus { border-color: var(--epix-focus); outline: non
 .loading-bar-fill { height: 100%; width: 0%; background-color: var(--epix-accent); border-radius: 999px; transition: width 0.3s ease-out }
 .loading-step { font-size: 13px; color: var(--epix-text-mid); min-height: 1.5em } /* text-mid: sits on the canvas tint */
 
+#loading-retry { margin-top: 16px; padding: 8px 16px; border: 1px solid var(--epix-border); border-radius: 6px; background: var(--epix-bg); color: var(--epix-text); cursor: pointer }
+#loading-retry:hover { border-color: var(--epix-accent) }
+
 
 /* ---- menus (js/utils/Menu.js: appended to body, inline top/left,
         shown by .visible; keep the hide as opacity/max-height so jQuery

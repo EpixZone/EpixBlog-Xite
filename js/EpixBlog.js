@@ -71,7 +71,19 @@
       this.follow.init();
     }
 
-    loadData(query) {
+    queryRows(query, cb, attempt) {
+      this.cmd("dbQuery", [query], (rows) => {
+        if (Array.isArray(rows)) { cb(rows); return; }
+        this.log("Database query is not ready:", rows && rows.error);
+        if ((attempt || 0) < 20) {
+          setTimeout(() => this.queryRows(query, cb, (attempt || 0) + 1), 1500);
+        } else if (this.initial_load) {
+          this.setLoadingProgress(45, "The blog database is still unavailable. Retry loading.");
+        }
+      });
+    }
+
+    loadData(query, cb) {
       var self = this;
       if (!query) query = "new";
       if (query === "old") {
@@ -79,7 +91,7 @@
       } else {
         query = "SELECT key, value FROM json LEFT JOIN keyvalue USING (json_id) WHERE directory = '' AND file_name = 'data.json'";
       }
-      this.cmd("dbQuery", [query], function(res) {
+      this.queryRows(query, function(res) {
         self.data = {};
         if (res) {
           for (var i = 0; i < res.length; i++) {
@@ -92,6 +104,7 @@
         // Re-evaluate against the data that just loaded, so a bar shown
         // from a stale mid-update read converges instead of sticking.
         self.checkPublishbar();
+        if (cb) cb();
       });
     }
 
@@ -108,7 +121,7 @@
         "WHERE post.title IS NOT NULL " +
         "ORDER BY date_added DESC LIMIT 3";
 
-      this.cmd("dbQuery", [query], function(res) {
+      this.queryRows(query, function(res) {
         if (res.length) {
           $(".lastcomments").css("display", "block");
           res.reverse();
@@ -240,8 +253,8 @@
           User.checkCert();
         };
 
-        if (res.error) {
-          self.cmd("dbQuery", ["SELECT *, -1 AS votes FROM post WHERE post_id = " + self.post_id + " LIMIT 1"], parse_res);
+        if (!Array.isArray(res)) {
+          self.queryRows("SELECT *, -1 AS votes FROM post WHERE post_id = " + self.post_id + " LIMIT 1", parse_res);
         } else {
           parse_res(res);
         }
@@ -306,14 +319,14 @@
           });
         };
 
-        if (res.error) {
+        if (!Array.isArray(res)) {
           var query2 = "SELECT post.*, COUNT(comment.post_id) AS comments, -1 AS votes " +
             "FROM post " +
             "LEFT JOIN comment ON (comment.blog_post_id = post.post_id) " +
             "GROUP BY post.post_id " +
             "ORDER BY date_published DESC " +
             "LIMIT " + ((self.page - 1) * limit) + ", " + (limit + 1);
-          self.cmd("dbQuery", [query2], parse_res);
+          self.queryRows(query2, parse_res);
         } else {
           parse_res(res);
         }
@@ -470,8 +483,9 @@
       var self = this;
       setTimeout(function() {
         if (self.initial_load) {
-          self.initial_load = false;
-          self.hideLoading();
+          self.setLoadingProgress(45, "Still loading the blog. You can retry if the connection has stalled.");
+          var retry = document.getElementById("loading-retry");
+          if (retry) retry.hidden = false;
         }
       }, 15000);
     }
@@ -486,16 +500,16 @@
         self.setLoadingProgress(25, "Loading language...");
         loadLanguage(lang, function() {
           self.setLoadingProgress(45, "Loading data...");
-          self.loadData();
           self.cmd("siteInfo", {}, function(site_info) {
             self.setLoadingProgress(65, "Loading site info...");
             self.setSiteinfo(site_info);
-            User.updateMyInfo(function() {
-              self.setLoadingProgress(90, "Rendering page...");
-              self.routeUrl(window.location.search.substring(1));
-              // Additive, idempotent, sync-gated migration of legacy data.json
-              // comments/votes into the signed-CRDT merge files.
-              self.migrateRecords();
+            self.loadData("new", function() {
+              User.updateMyInfo(function() {
+                self.setLoadingProgress(90, "Rendering page...");
+                self.routeUrl(window.location.search.substring(1));
+                // Migrate only after metadata and identity have loaded.
+                self.migrateRecords();
+              });
             });
             translateDOM();
           });
@@ -1004,6 +1018,11 @@
 
     setSiteinfo(site_info) {
       var self = this;
+      if (this.site_info && site_info) {
+        var previous = this.site_info;
+        site_info = Object.assign({}, previous, site_info);
+        site_info.settings = Object.assign({}, previous.settings, site_info.settings);
+      }
       this.site_info = site_info;
       this.event_site_info.resolve(site_info);
       if ($("body").hasClass("page-post")) User.checkCert();
