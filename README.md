@@ -56,3 +56,17 @@ epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f/
 ## License
 
 MIT
+
+## Tests
+
+Run the dependency-free loading and login tests with `node --test tests/*.test.cjs`.
+
+The editing browser suite uses the real page and editor libraries with an in-memory EpixFrame file store. It covers grouped saves, cancel/retry behavior, lazy loading, navigation blocking, comment saves, and mobile controls:
+
+```sh
+npm install --prefix /tmp/epixblog-browser-tests playwright
+/tmp/epixblog-browser-tests/node_modules/.bin/playwright install chromium
+EPIX_BROWSER_TEST_TOOLS=/tmp/epixblog-browser-tests/node_modules node tests/editing-browser.cjs
+```
+
+Set `EPIX_BROWSER_TEST_OUTPUT` to a directory to save screenshots.
