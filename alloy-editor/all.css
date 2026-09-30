@@ -719,7 +719,7 @@ legend.cke_voice_label{display:none}
    .meditor-markdown keeps overflow:hidden + box-sizing for the autoHeight
    fallback; .ae-container-edit-link-target stays dead. */
 
-.meditor { z-index: 999; position: relative; }
+.meditor { z-index: 999; position: relative; min-width: 0; }
 
 /* Mode toggle: absolute (not floated) so it never disturbs the first line.
    Sits above the editable, right-aligned; .markdown = markdown mode active. */
@@ -747,7 +747,51 @@ legend.cke_voice_label{display:none}
 }
 .meditor-markdown:focus { border-color: var(--epix-focus); outline: none }
 
-/* ---- EasyMDE (markdown mode with the formatting toolbar) ---- */
+/* The same toolbar stays available in both editing modes. */
+.meditor-toolbar {
+	position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center;
+	gap: 3px; max-width: 100%; padding: 5px; box-sizing: border-box;
+	background: var(--epix-surface-2); border: 1px solid var(--epix-border-strong);
+	border-radius: var(--epix-radius-md); text-align: left;
+}
+.meditor-toolbar button, .meditor-url-form button {
+	min-width: 32px; min-height: 34px; padding: 5px 8px; margin: 0;
+	border: 1px solid transparent; border-radius: var(--epix-radius-sm);
+	font: 12px/1.3 var(--epix-font-sans); color: var(--epix-text-mid); background: transparent;
+	cursor: pointer; white-space: nowrap;
+}
+.meditor-toolbar .bold { font-weight: bold }
+.meditor-toolbar .italic { font-style: italic }
+.meditor-toolbar .strikethrough { text-decoration: line-through }
+.meditor-toolbar .code, .meditor-toolbar .heading { font-family: var(--epix-font-mono) }
+.meditor-toolbar button:hover, .meditor-url-form button:hover {
+	background: var(--epix-surface); border-color: var(--epix-border); color: var(--epix-text);
+}
+.meditor-toolbar button:focus-visible, .meditor-url-form button:focus-visible {
+	outline: 2px solid var(--epix-focus); outline-offset: 1px;
+}
+.meditor-toolbar button:disabled, .meditor-url-form button:disabled { opacity: 0.5; cursor: default }
+.meditor-url-form {
+	display: flex; flex-wrap: wrap; align-items: end; gap: 5px; padding: 10px 5px;
+	background: var(--epix-surface); color: var(--epix-text); text-align: left;
+}
+.meditor-url-form[hidden] { display: none }
+.meditor-url-form label { flex: 1 1 180px; min-width: 0; font: 12px/1.5 var(--epix-font-sans) }
+.meditor-url-form label span { display: block; margin-bottom: 4px }
+.meditor-url-form input {
+	width: 100%; min-width: 0; min-height: 34px; box-sizing: border-box; padding: 6px 8px;
+	font: 13px/1.5 var(--epix-font-mono); color: var(--epix-text); background: var(--epix-surface);
+	border: 1px solid var(--epix-border-strong); border-radius: var(--epix-radius-sm);
+}
+.meditor-url-form input:focus { outline: 2px solid var(--epix-focus); outline-offset: 1px }
+.meditor-url-form button { border-color: var(--epix-border-strong) }
+.meditor-url-error { flex-basis: 100%; font: 12px/1.5 var(--epix-font-sans); color: var(--epix-text) }
+.meditor .cke_editable pre { display: block; white-space: pre-wrap; font: 13.5px/1.55 var(--epix-font-mono) }
+@media (pointer: coarse) {
+	.meditor-toolbar button, .meditor-url-form button { min-width: 44px; min-height: 44px }
+}
+
+/* ---- EasyMDE Markdown surface ---- */
 
 .EasyMDEContainer { margin: 0 }
 .EasyMDEContainer .CodeMirror,
@@ -761,27 +805,8 @@ legend.cke_voice_label{display:none}
    with the post and the window stays the scroll container */
 .EasyMDEContainer .CodeMirror {
 	height: auto; min-height: 280px; padding: 8px 6px;
-	border-radius: 0 0 var(--epix-radius-md) var(--epix-radius-md);
+	border-radius: var(--epix-radius-md);
 	background: var(--epix-surface); color: var(--epix-text); border-color: var(--epix-border-strong);
-}
-.EasyMDEContainer .editor-toolbar {
-	position: sticky; top: 0; z-index: 5; opacity: 1;
-	border-radius: var(--epix-radius-md) var(--epix-radius-md) 0 0;
-	background: var(--epix-surface-2); border-color: var(--epix-border-strong);
-	display: flex; flex-wrap: nowrap; align-items: center; padding: 4px 6px; overflow-x: auto;
-}
-.EasyMDEContainer .editor-toolbar button {
-	color: var(--epix-text-mid); width: 30px; height: 30px; display: inline-flex; align-items: center;
-	justify-content: center; margin: 0 1px; padding: 0; border-radius: var(--epix-radius-sm);
-	border: 1px solid transparent; font-size: 14px; flex: none; cursor: pointer;
-}
-.EasyMDEContainer .editor-toolbar button:hover, .EasyMDEContainer .editor-toolbar button.active {
-	background: var(--epix-surface); border-color: var(--epix-border); color: var(--epix-text)
-}
-.EasyMDEContainer .editor-toolbar button:focus-visible { outline: 2px solid var(--epix-focus); outline-offset: 1px }
-.EasyMDEContainer .editor-toolbar i.separator {
-	display: inline-block; width: 1px; height: 18px; margin: 0 4px;
-	border-left: 1px solid var(--epix-border-strong); border-right: none; vertical-align: middle
 }
 .EasyMDEContainer .editor-preview { background: var(--epix-surface); color: var(--epix-text) }
 .EasyMDEContainer .CodeMirror-cursor { border-left-color: var(--epix-text) }
@@ -907,25 +932,3 @@ h3.empty:before { content: "Sub-heading"; color: var(--epix-text-low); position:
 	letter-spacing: 0.08em; text-transform: uppercase; color: var(--epix-text-low);
 	background-color: var(--epix-surface); padding: 0 6px;
 }
-
-/* ---- EasyMDE toolbar icons: FontAwesome is not shipped (300KB); each
-        button gets a small currentColor SVG mask instead ---- */
-
-.EasyMDEContainer .editor-toolbar button i.fa {
-	display: inline-block; width: 16px; height: 16px; font-style: normal;
-	background-color: currentColor;
-	-webkit-mask-position: center; mask-position: center;
-	-webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-	-webkit-mask-size: 16px 16px; mask-size: 16px 16px;
-}
-.EasyMDEContainer .editor-toolbar button.bold i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4h6a4 4 0 0 1 0 8H7zM7 12h7a4 4 0 0 1 0 8H7z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4h6a4 4 0 0 1 0 8H7zM7 12h7a4 4 0 0 1 0 8H7z'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.italic i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M11 4h8M5 20h8M15 4l-6 16'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M11 4h8M5 20h8M15 4l-6 16'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.strikethrough i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M17.5 7.5c-.6-2-2.6-3.2-5.3-3.2-3 0-5 1.5-5 3.7 0 .6.1 1.1.4 1.6M6.3 16c.8 2.1 3 3.4 5.9 3.4 3.3 0 5.4-1.5 5.4-3.9 0-1-.4-1.9-1.3-2.5M4 12h16'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M17.5 7.5c-.6-2-2.6-3.2-5.3-3.2-3 0-5 1.5-5 3.7 0 .6.1 1.1.4 1.6M6.3 16c.8 2.1 3 3.4 5.9 3.4 3.3 0 5.4-1.5 5.4-3.9 0-1-.4-1.9-1.3-2.5M4 12h16'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.heading i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M6 4v16M18 4v16M6 12h12'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M6 4v16M18 4v16M6 12h12'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.quote i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M6.5 6h4.5v6.5c0 3.5-2 5.7-5.5 6l-.5-2c1.8-.4 2.8-1.5 3-3H6.5zM14.5 6H19v6.5c0 3.5-2 5.7-5.5 6l-.5-2c1.8-.4 2.8-1.5 3-3h-1.5z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M6.5 6h4.5v6.5c0 3.5-2 5.7-5.5 6l-.5-2c1.8-.4 2.8-1.5 3-3H6.5zM14.5 6H19v6.5c0 3.5-2 5.7-5.5 6l-.5-2c1.8-.4 2.8-1.5 3-3h-1.5z'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.code i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 8-4 4 4 4M15 8l4 4-4 4'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 8-4 4 4 4M15 8l4 4-4 4'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.unordered-list i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='4.5' cy='6' r='0.8'/%3E%3Ccircle cx='4.5' cy='12' r='0.8'/%3E%3Ccircle cx='4.5' cy='18' r='0.8'/%3E%3Cpath d='M9.5 6H20M9.5 12H20M9.5 18H20' fill='none'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='4.5' cy='6' r='0.8'/%3E%3Ccircle cx='4.5' cy='12' r='0.8'/%3E%3Ccircle cx='4.5' cy='18' r='0.8'/%3E%3Cpath d='M9.5 6H20M9.5 12H20M9.5 18H20' fill='none'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.ordered-list i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000' stroke='none'%3E%3Ctext x='2' y='8.5' font-size='8' font-family='sans-serif' font-weight='bold'%3E1%3C/text%3E%3Ctext x='2' y='20' font-size='8' font-family='sans-serif' font-weight='bold'%3E2%3C/text%3E%3Crect x='10' y='4.8' width='11' height='2.2' rx='1.1'/%3E%3Crect x='10' y='16.2' width='11' height='2.2' rx='1.1'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000' stroke='none'%3E%3Ctext x='2' y='8.5' font-size='8' font-family='sans-serif' font-weight='bold'%3E1%3C/text%3E%3Ctext x='2' y='20' font-size='8' font-family='sans-serif' font-weight='bold'%3E2%3C/text%3E%3Crect x='10' y='4.8' width='11' height='2.2' rx='1.1'/%3E%3Crect x='10' y='16.2' width='11' height='2.2' rx='1.1'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.link i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13.5a4.5 4.5 0 0 0 6.4 0l2.8-2.8a4.5 4.5 0 0 0-6.4-6.4L11.5 5.6'/%3E%3Cpath d='M14 10.5a4.5 4.5 0 0 0-6.4 0l-2.8 2.8a4.5 4.5 0 0 0 6.4 6.4l1.3-1.3'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 13.5a4.5 4.5 0 0 0 6.4 0l2.8-2.8a4.5 4.5 0 0 0-6.4-6.4L11.5 5.6'/%3E%3Cpath d='M14 10.5a4.5 4.5 0 0 0-6.4 0l-2.8 2.8a4.5 4.5 0 0 0 6.4 6.4l1.3-1.3'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.image i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Ccircle cx='8.5' cy='10' r='1.5' fill='%23000' stroke='none'/%3E%3Cpath d='m21 15-5-5-9 9'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Ccircle cx='8.5' cy='10' r='1.5' fill='%23000' stroke='none'/%3E%3Cpath d='m21 15-5-5-9 9'/%3E%3C/svg%3E") }
-.EasyMDEContainer .editor-toolbar button.horizontal-rule i.fa { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M4 12h16'/%3E%3C/svg%3E") }

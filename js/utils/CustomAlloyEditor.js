@@ -6,16 +6,6 @@
       var editor = AlloyEditor.editable(this.tag);
       this.editor = editor;
 
-      // Add top padding to avoid toolbar movement
-      var el = editor._editor.element.$;
-      var height_before = el.getClientRects()[0].height;
-      var style = getComputedStyle(el);
-      el.style.position = "relative";
-      el.style.paddingTop = (parseInt(style["padding-top"]) + 20) + "px";
-      var height_added = el.getClientRects()[0].height - height_before;
-      el.style.top = (parseInt(style["marginTop"]) - 20 - height_added) + "px";
-      el.style.marginBottom = (parseInt(style["marginBottom"]) + parseInt(el.style.top)) + "px";
-
       // Bind handlers
       this.handleSelectionChange = this.handleSelectionChange.bind(this);
       this.handleChange = this.handleChange.bind(this);
@@ -57,6 +47,68 @@
       this.image_resize_height = 900;
       this.image_preverse_ratio = true;
       this.image_try_png = false;
+    }
+
+    rememberSelection() {
+      if (this.destroyed) return;
+      var selection = window.getSelection();
+      if (!selection.rangeCount || !this.tag.contains(selection.anchorNode) || !this.tag.contains(selection.focusNode)) return;
+      var native = this.editor.get("nativeEditor");
+      this.bookmarks = native.getSelection().createBookmarks2(true);
+    }
+
+    clearSelection() {
+      this.bookmarks = null;
+    }
+
+    restoreSelection() {
+      if (this.destroyed) return false;
+      var native = this.editor.get("nativeEditor");
+      if (!native.editable()) return false;
+      native.focus();
+      if (this.bookmarks) native.getSelection().selectBookmarks(this.bookmarks);
+      else {
+        var range = native.createRange();
+        range.moveToElementEditablePosition(native.editable(), true);
+        native.getSelection().selectRanges([range]);
+      }
+      return true;
+    }
+
+    getLinkUrl() {
+      if (!this.restoreSelection()) return "";
+      var native = this.editor.get("nativeEditor");
+      var link = new CKEDITOR.Link(native, {appendProtocol: false}).getFromSelection();
+      return link ? link.getAttribute("href") : "";
+    }
+
+    format(action, url) {
+      if (this.readOnly || !this.restoreSelection()) return;
+      var native = this.editor.get("nativeEditor");
+      var commands = {
+        bold: "bold", italic: "italic", strikethrough: "strike", quote: "blockquote",
+        "unordered-list": "bulletedlist", "ordered-list": "numberedlist", "horizontal-rule": "horizontalrule"
+      };
+      native.fire("saveSnapshot");
+      if (commands[action]) native.execCommand(commands[action]);
+      else if (action === "code" || action === "code-block" || action === "heading") {
+        var style = new CKEDITOR.style({element: action === "code" ? "code" : action === "code-block" ? "pre" : "h2"});
+        if (style.checkActive(native.elementPath(), native)) native.removeStyle(style);
+        else native.applyStyle(style);
+      } else if (action === "link") {
+        var links = new CKEDITOR.Link(native, {appendProtocol: false});
+        var link = links.getFromSelection();
+        if (link) links.update(url, link);
+        else links.create(url);
+      } else if (action === "image") {
+        var image = new CKEDITOR.dom.element("img", native.document);
+        image.setAttributes({src: url, alt: native.getSelection().getSelectedText() || "Image description"});
+        native.insertElement(image);
+      }
+      native.fire("saveSnapshot");
+      native.fire("change");
+      native.selectionChange(true);
+      this.rememberSelection();
     }
 
     setReadOnly(readOnly) {
@@ -237,6 +289,7 @@
       }
 
       var el = e.editor.getSelection().getStartElement();
+      if (!el) return false;
       if (el.getName() === "br") {
         el = el.getParent();
       }

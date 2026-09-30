@@ -3,8 +3,7 @@
   class Meditor {
     constructor(tag_original, body) {
       this.tag_original = tag_original;
-      // The rail links field is too small for the full markdown toolbar;
-      // it uses a compact plain textarea for markdown.
+      // Profile links use a compact toolbar and plain Markdown textarea.
       this.simple = tag_original.classList.contains("links");
       this.mde = null;
       this.removed = false;
@@ -65,6 +64,7 @@
       this.tag_editmode = this.tag.previousSibling;
       this.tag_editmode.onclick = this.handleEditmodeChange;
       this.updateEditmodeLabel();
+      this.createToolbar();
 
       // Create ckeditor
       if (window.AlloyEditor) {
@@ -121,28 +121,243 @@
         status: false,
         forceSync: true, // keeps textarea.value fresh for getMarkdown()/val()
         tabSize: 2,
-        autoDownloadFontAwesome: false, // icons come from meditor.css masks
+        autoDownloadFontAwesome: false,
         minHeight: "280px",
-        // exactly three dashes: the read-more fold cut in EpixBlog.js
-        // requires a literal \n---\n (the EasyMDE default is -----)
-        insertTexts: { horizontalRule: ["", "\n\n---\n\n"] },
-        toolbar: [
-          "bold", "italic", "strikethrough", "|",
-          "heading", "quote", "code", "|",
-          "unordered-list", "ordered-list", "|",
-          "link", "image", "|",
-          {
-            name: "horizontal-rule",
-            action: EasyMDE.drawHorizontalRule,
-            className: "fa fa-minus",
-            title: "Horizontal rule / read-more fold"
-          }
-        ],
-        toolbarTips: true
+        toolbar: false
       });
       // grow with the content; the window stays the scroll container
       mde.codemirror.setOption("viewportMargin", Infinity);
       return mde;
+    }
+
+    createToolbar() {
+      var actions = [
+        ["bold", "Bold", "B"], ["italic", "Italic", "I"],
+        ["strikethrough", "Strikethrough", "S"], ["code", "Inline code", "</>"],
+        ["link", "Link", "Link"]
+      ];
+      if (!this.simple) actions.push(
+        ["heading", "Heading", "H2"], ["quote", "Quote", "Quote"],
+        ["code-block", "Code block", "Code"],
+        ["unordered-list", "Bulleted list", "List"], ["ordered-list", "Numbered list", "1. List"],
+        ["image", "Image", "Image"], ["horizontal-rule", "Horizontal rule / read-more fold", "Rule"]
+      );
+      var toolbar = document.createElement("div");
+      toolbar.className = "meditor-toolbar";
+      toolbar.setAttribute("role", "toolbar");
+      toolbar.setAttribute("aria-label", "Text formatting");
+      actions.forEach((action, index) => {
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = action[0];
+        button.dataset.action = action[0];
+        button.title = action[1];
+        button.setAttribute("aria-label", action[1]);
+        button.textContent = action[2];
+        button.tabIndex = index ? -1 : 0;
+        button.onmousedown = (e) => {
+          if (e.button !== 0) return;
+          this.rememberSelection();
+          e.preventDefault();
+        };
+        button.onclick = () => this.format(action[0]);
+        toolbar.appendChild(button);
+      });
+      toolbar.onkeydown = (e) => {
+        var buttons = Array.from(toolbar.querySelectorAll("button"));
+        var index = buttons.indexOf(e.target);
+        if (index < 0) return;
+        // Finish keyboard activation here before focus returns to the editor.
+        // Alloy's Enter keyup handler assumes Enter was typed in rich text.
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); return; }
+        if (e.key === "ArrowRight") index = (index + 1) % buttons.length;
+        else if (e.key === "ArrowLeft") index = (index + buttons.length - 1) % buttons.length;
+        else if (e.key === "Home") index = 0;
+        else if (e.key === "End") index = buttons.length - 1;
+        else if (e.key === "Escape") { this.focus(); return; }
+        else return;
+        e.preventDefault();
+        buttons.forEach((button, i) => button.tabIndex = i === index ? 0 : -1);
+        buttons[index].focus();
+      };
+      toolbar.onkeyup = (e) => {
+        if (e.target.tagName === "BUTTON" && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          e.target.click();
+        }
+      };
+      this.tag_container.insertBefore(toolbar, this.tag);
+      this.tag_toolbar = toolbar;
+
+      var form = document.createElement("form");
+      form.className = "meditor-url-form";
+      form.hidden = true;
+      var label = document.createElement("label");
+      label.innerHTML = "<span>Link URL</span><input name='url' type='text' placeholder='https://example.com' required autocomplete='off'>";
+      form.appendChild(label);
+      form.insertAdjacentHTML("beforeEnd", "<button type='submit'>Insert link</button><button type='button'>Cancel</button><span class='meditor-url-error' role='alert'></span>");
+      this.tag_container.insertBefore(form, this.tag);
+      this.tag_url_form = form;
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        if (this.readOnly) return;
+        var url = form.elements.url.value.trim();
+        if (!this.validUrl(url, this.url_action === "image")) {
+          form.querySelector(".meditor-url-error").textContent = "Use a web address, relative path, or " + (this.url_action === "image" ? "image path." : "mailto: link.");
+          return;
+        }
+        // Encode characters that would close or break a Markdown destination.
+        url = url.replace(/[\s()<>"\\]/g, c => "%" + c.charCodeAt(0).toString(16).toUpperCase());
+        form.hidden = true;
+        this.format(this.url_action, url);
+      };
+      form.querySelector("button[type=button]").onclick = () => this.closeUrlForm();
+      form.onkeydown = (e) => {
+        if (e.key === "Enter") e.preventDefault();
+        if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); this.closeUrlForm(); }
+      };
+      form.onkeyup = (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (e.target.name === "url") form.requestSubmit();
+          else if (e.target.tagName === "BUTTON") e.target.click();
+        }
+      };
+      this.handleSelection = () => this.rememberSelection();
+      document.addEventListener("selectionchange", this.handleSelection);
+      this.tag_container.addEventListener("focusout", this.handleSelection);
+    }
+
+    validUrl(url, image) {
+      if (!url || /[\u0000-\u001f\u007f]/.test(url)) return false;
+      var scheme = url.match(/^([a-z][a-z0-9+.-]*):/i);
+      return !scheme || /^(https?|mailto)$/i.test(scheme[1]) && (!image || scheme[1].toLowerCase() !== "mailto");
+    }
+
+    rememberSelection() {
+      if (!this.tag_markdown || this.removed) return;
+      if (!this.tag_editmode.classList.contains("markdown") && this.editor) this.editor.rememberSelection();
+    }
+
+    closeUrlForm() {
+      this.tag_url_form.hidden = true;
+      if (this.editor && !this.tag_editmode.classList.contains("markdown")) this.editor.restoreSelection();
+      else this.focus();
+    }
+
+    format(action, url) {
+      if (this.readOnly || this.removed) return;
+      var markdown = this.tag_editmode.classList.contains("markdown");
+      if ((action === "link" || action === "image") && !url) {
+        this.rememberSelection();
+        this.url_action = action;
+        var form = this.tag_url_form;
+        form.querySelector("label span").textContent = action === "image" ? "Image URL" : "Link URL";
+        form.querySelector("button[type=submit]").textContent = action === "image" ? "Insert image" : "Insert link";
+        form.querySelector(".meditor-url-error").textContent = "";
+        form.elements.url.value = !markdown && action === "link" ? this.editor.getLinkUrl() : "";
+        form.hidden = false;
+        form.elements.url.focus();
+        return;
+      }
+      this.tag_url_form.hidden = true;
+      if (markdown) this.formatMarkdown(action, url);
+      else if (this.editor) this.editor.format(action, url);
+    }
+
+    formatMarkdown(action, url) {
+      var textarea = this.tag_markdown.firstChild;
+      var cm = this.mde && this.mde.codemirror;
+      var value = cm ? cm.getValue() : textarea.value;
+      var start = cm ? cm.indexFromPos(cm.getCursor("from")) : textarea.selectionStart;
+      var end = cm ? cm.indexFromPos(cm.getCursor("to")) : textarea.selectionEnd;
+      var selected = value.slice(start, end);
+      var replacement, selectionStart, selectionEnd;
+      var markers = {bold: "**", italic: "*", strikethrough: "~~", code: "`"};
+      if (markers[action]) {
+        var marker = markers[action];
+        var character = marker[0];
+        var leadingRun = text => { var length = 0; while (text[length] === character) length++; return length; };
+        var trailingRun = text => leadingRun(text.split("").reverse().join(""));
+        var removable = length => action === "italic" ? length % 2 === 1 : length >= marker.length;
+        var inside = Math.min(leadingRun(selected), trailingRun(selected));
+        var outside = Math.min(trailingRun(value.slice(0, start)), leadingRun(value.slice(end)));
+        if (inside && removable(inside) && selected.length > inside * 2) {
+          var count = action === "code" ? inside : marker.length;
+          selected = selected.slice(count, -count);
+          replacement = selected;
+          selectionStart = start;
+        } else if (outside && removable(outside)) {
+          var count = action === "code" ? outside : marker.length;
+          start -= count;
+          end += count;
+          replacement = selected;
+          selectionStart = start;
+        } else {
+          if (action !== "code" && selected.trim()) {
+            start += selected.match(/^\s*/)[0].length;
+            end -= selected.match(/\s*$/)[0].length;
+            selected = selected.trim();
+          }
+          selected = selected || (action === "code" ? "code" : "text");
+          if (action === "code") marker = this.codeFence(selected, 1);
+          var padding = action === "code" && /^`|`$/.test(selected) ? " " : "";
+          replacement = marker + padding + selected + padding + marker;
+          selectionStart = start + marker.length + padding.length;
+        }
+        selectionEnd = selectionStart + selected.length;
+      } else if (action === "link" || action === "image") {
+        var label = selected || (action === "image" ? "Image description" : url);
+        label = label.replace(/([\\[\]])/g, "\\$1");
+        var prefix = action === "image" ? "![" : "[";
+        replacement = prefix + label + "](" + url + ")";
+        selectionStart = start + prefix.length;
+        selectionEnd = selectionStart + label.length;
+      } else if (action === "horizontal-rule" || action === "code-block") {
+        var before = start && value.slice(0, start).replace(/\n+$/, "") ? "\n\n".slice((value.slice(0, start).match(/\n*$/) || [""])[0].length) : "";
+        var after = end < value.length ? "\n\n".slice((value.slice(end).match(/^\n*/) || [""])[0].length) : "";
+        var fence = this.codeFence(selected, 3);
+        var content = selected || "code";
+        replacement = before + (action === "horizontal-rule" ? "---\n\n" : fence + "\n" + content + "\n" + fence) + after;
+        selectionStart = start + (action === "horizontal-rule" ? replacement.length : before.length + fence.length + 1);
+        selectionEnd = selectionStart + (action === "horizontal-rule" ? 0 : content.length);
+      } else {
+        // Block actions apply to complete lines, including multiline selections.
+        start = value.lastIndexOf("\n", start - 1) + 1;
+        if (end > start && value[end - 1] === "\n") end--;
+        var lineEnd = value.indexOf("\n", end);
+        end = lineEnd < 0 ? value.length : lineEnd;
+        var lines = value.slice(start, end).split("\n");
+        var patterns = {heading: /^#{1,6} /, quote: /^> /, "unordered-list": /^[-*+] /, "ordered-list": /^\d+\. /};
+        var pattern = patterns[action];
+        if (!pattern) return;
+        var remove = lines.every(line => pattern.test(line));
+        replacement = lines.map((line, index) => {
+          if (remove) return line.replace(pattern, "");
+          var prefix = action === "heading" ? "## " : action === "quote" ? "> " : action === "unordered-list" ? "- " : (index + 1) + ". ";
+          return prefix + line.replace(pattern, "");
+        }).join("\n");
+        selectionStart = start;
+        selectionEnd = start + replacement.length;
+        if (lines.length === 1 && !lines[0]) selectionStart = selectionEnd;
+      }
+      if (cm) {
+        cm.operation(() => {
+          cm.replaceRange(replacement, cm.posFromIndex(start), cm.posFromIndex(end), "+input");
+          cm.setSelection(cm.posFromIndex(selectionStart), cm.posFromIndex(selectionEnd));
+        });
+        cm.focus();
+      } else {
+        textarea.focus();
+        textarea.setRangeText(replacement, start, end, "select");
+        textarea.setSelectionRange(selectionStart, selectionEnd);
+        textarea.dispatchEvent(new Event("input", {bubbles: true}));
+        this.autoHeight(textarea);
+      }
+    }
+
+    codeFence(text, minimum) {
+      return "`".repeat(Math.max(minimum, ...(text.match(/`+/g) || []).map(run => run.length + 1)));
     }
 
     autoHeight(elem) {
@@ -167,7 +382,19 @@
         return this.mde ? this.mde.value() : this.tag_markdown.firstChild.value;
       } else {
         if (this.tag.innerHTML === this.rich_snapshot) return this.rich_markdown;
-        return toMarkdown(this.tag.innerHTML, {gfm: true});
+        return toMarkdown(this.tag.innerHTML, {gfm: true, converters: [
+          {filter: "hr", replacement: () => "\n\n---\n\n"},
+          {
+            filter: node => node.nodeName === "CODE" && node.parentNode.nodeName !== "PRE",
+            replacement: (content, node) => {
+              var text = node.textContent;
+              var fence = this.codeFence(text, 1);
+              var padding = /^`|`$/.test(text) ? " " : "";
+              return fence + padding + text + padding + fence;
+            }
+
+          }
+        ]});
       }
     }
 
@@ -181,6 +408,7 @@
 
     handleEditmodeChange(e, preset_markdown) {
       if (e && this.readOnly) return false;
+      if (this.tag_url_form) this.tag_url_form.hidden = true;
       if (this.tag_editmode.classList.contains("markdown")) {
         // Change to ckeditor
         this.tag_markdown.style.display = "none";
@@ -188,6 +416,7 @@
         this.rich_markdown = this.getMarkdown();
         this.tag.innerHTML = this.getHtml();
         this.rich_snapshot = this.tag.innerHTML;
+        if (this.editor) this.editor.clearSelection();
       } else {
         // Change to markdown. preset_markdown (the untouched stored source)
         // is only passed by the automatic switch right after load.
@@ -227,6 +456,9 @@
       if (this.mde) this.mde.codemirror.setOption("readOnly", readOnly);
       if (this.tag_markdown) this.tag_markdown.firstChild.readOnly = readOnly;
       if (this.editor) this.editor.setReadOnly(readOnly);
+      if (this.tag_toolbar) this.tag_toolbar.querySelectorAll("button").forEach(button => button.disabled = readOnly);
+      if (this.tag_url_form) this.tag_url_form.querySelectorAll("input, button").forEach(control => control.disabled = readOnly);
+      if (this.tag_editmode) this.tag_editmode.setAttribute("aria-disabled", String(readOnly));
     }
 
     focus() {
@@ -241,6 +473,7 @@
 
     remove() {
       this.removed = true;
+      document.removeEventListener("selectionchange", this.handleSelection);
       if (this.mde) {
         this.mde.toTextArea();
         this.mde = null;

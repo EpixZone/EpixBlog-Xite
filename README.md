@@ -4,7 +4,7 @@ Publish your thoughts, uncensored. A decentralized blogging platform on [EpixNet
 
 ## Features
 
-- Rich markdown editor with live preview
+- Markdown and rich text editing with selection-based formatting controls
 - Code syntax highlighting
 - Image zoom and optional video embeds
 - Per-user comments with xID authentication
@@ -61,7 +61,7 @@ MIT
 
 Run the dependency-free loading and login tests with `node --test tests/*.test.cjs`.
 
-The editing browser suite uses the real page and editor libraries with an in-memory EpixFrame file store. It covers grouped saves, cancel/retry behavior, lazy loading, navigation blocking, comment saves, and mobile controls:
+The editing browser suite uses the real page and editor libraries with an in-memory EpixFrame file store. It covers grouped saves, cancel/retry behavior, lazy loading, navigation blocking, comment saves, mobile controls, and selection-based formatting in both editor views:
 
 ```sh
 npm install --prefix /tmp/epixblog-browser-tests playwright
