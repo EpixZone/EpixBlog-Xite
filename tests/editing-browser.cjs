@@ -83,7 +83,10 @@ const server = http.createServer((req, res) => {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await context.newPage();
   const errors = [];
-  page.on("pageerror", error => errors.push(error.message));
+  page.on("pageerror", error => {
+    errors.push(error.stack || error.message);
+    console.error("Browser error:", error.stack || error.message);
+  });
   page.on("dialog", dialog => dialog.dismiss());
   const origin = `http://127.0.0.1:${server.address().port}/`;
   const titleEditor = '#post_1 textarea.editor[aria-label="Title"]';
@@ -246,6 +249,8 @@ const server = http.createServer((req, res) => {
     await page.waitForSelector("#post_1 .CodeMirror");
     assert.equal(await page.evaluate(() => document.querySelector("#post_1 .CodeMirror").CodeMirror.getOption("readOnly")), true,
       "an editor loaded during save cannot accept edits that would be dropped");
+    assert.equal(await page.locator("#post_1 .meditor-toolbar button").evaluateAll(buttons => buttons.length > 0 && buttons.every(button => button.disabled)), true,
+      "formatting controls are disabled during pending saves");
     await page.waitForFunction(() => !document.querySelector("textarea.editor, .meditor"));
     await page.unroute("**/alloy-editor/all.js");
     assert.equal(await page.evaluate(() => testStore.post[0].title), "Saved while loading");
@@ -322,6 +327,8 @@ const server = http.createServer((req, res) => {
     }), true, "profile pencil stays attached to the mobile profile");
     await touchContext.close();
     console.log("PASS mobile touch targets, profile button placement, and smooth avatar scaling");
+
+    await require("./editor-formatting.cjs")({ page, reset, startPost, editBody, saved, cancel });
 
     assert.deepEqual(errors, [], "no browser runtime errors");
   } catch (error) {
