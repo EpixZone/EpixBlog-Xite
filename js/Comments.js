@@ -71,6 +71,7 @@
     }
 
     applyCommentData(elem, comment) {
+      if (elem.hasClass("editing-object")) return;
       var user_address = comment.directory.replace("users/", "");
       $(".comment-body", elem).html(Text.renderMarked(comment.body, {"sanitize": true}));
 

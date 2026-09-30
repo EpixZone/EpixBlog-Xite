@@ -97,9 +97,11 @@
           for (var i = 0; i < res.length; i++) {
             self.data[res[i].key] = res[i].value;
           }
-          if (self.data.title) $(".left h1 a:not(.editable-edit)").html(self.data.title).data("content", self.data.title);
-          if (self.data.description) $(".left h2").html(Text.renderMarked(self.data.description)).data("content", self.data.description);
-          if (self.data.links) $(".left .links").html(Text.renderMarked(self.data.links)).data("content", self.data.links);
+          if (!$(".left").hasClass("editing-object")) {
+            $(".left [data-editable='title']").html(self.data.title || "").data("content", self.data.title || "");
+            $(".left [data-editable='description']").html(self.data.description ? Text.renderMarked(self.data.description) : "").data("content", self.data.description || "");
+            $(".left [data-editable='links']").html(self.data.links ? Text.renderMarked(self.data.links) : "").data("content", self.data.links || "");
+          }
         }
         // Re-evaluate against the data that just loaded, so a bar shown
         // from a stale mid-update read converges instead of sticking.
@@ -352,7 +354,9 @@
 
     addInlineEditors(parent) {
       this.logStart("Adding inline editors");
-      var elems = $("[data-editable]:visible", parent);
+      var elems = $("[data-editable]", parent).filter(function() {
+        return !$(this).closest(".template, .meditor").length;
+      });
       for (var i = 0; i < elems.length; i++) {
         var elem = $(elems[i]);
         if (!elem.data("editor") && !elem.hasClass("editor")) {
@@ -415,6 +419,7 @@
     }
 
     applyPostdata(elem, post, full) {
+      if (elem.hasClass("editing-object")) return;
       if (!full) full = false;
       var title_hash = post.title.replace(/[#?& ]/g, "+").replace(/[+]+/g, "+");
       elem.data("object", "Post:" + post.post_id);
@@ -562,6 +567,44 @@
       }
     }
 
+    saveObjectFields(object, changes, cb) {
+      var parts = object.data("object").split(":");
+      var values = changes.map(function(change) {
+        return change.elem.data("editable-mode") === "timestamp" ? Time.timestamp(change.content) : change.content;
+      });
+      if (values.some((value) => typeof value === "number" && !Number.isFinite(value))) {
+        this.cmd("wrapperNotification", ["error", "Enter a valid publication date."]);
+        cb(false);
+        return;
+      }
+      this.cmd("fileGet", ["data/data.json"], (res) => {
+        var data;
+        try { data = JSON.parse(res); } catch (error) {
+          this.cmd("wrapperNotification", ["error", "Unable to read blog data. Your edits are still open."]);
+          cb(false);
+          return;
+        }
+        var target = parts[0] === "Site" ? data : data && Array.isArray(data.post) && data.post.find((post) => post.post_id === parseInt(parts[1]));
+        if (!target) {
+          this.cmd("wrapperNotification", ["error", "The edited post is no longer available. Your edits are still open."]);
+          cb(false);
+          return;
+        }
+        changes.forEach((change, i) => { target[change.elem.data("editable")] = values[i]; });
+        this.writeData(data, (saved) => {
+          if (!saved) { cb(false); return; }
+          var html = changes.map(function(change, i) {
+            change.elem.data("content", values[i]);
+            var mode = change.elem.data("editable-mode");
+            if (mode === "simple") return values[i];
+            if (mode === "timestamp") return Time.since(values[i]);
+            return Text.renderMarked(values[i]);
+          });
+          cb(html);
+        });
+      });
+    }
+
     saveSite(elem, type, id, content, cb) {
       var self = this;
       this.cmd("fileGet", ["data/data.json"], function(res) {
@@ -638,11 +681,11 @@
               break;
             }
           }
-          if (!post) return false;
+          if (!post) { if (cb) cb(false); return; }
           data.post.splice(data.post.indexOf(post), 1);
 
           self.writeData(data, function(res) {
-            if (cb) cb();
+            if (cb) cb(res === true);
             if (res === true) elem.slideUp();
           });
         });
@@ -654,7 +697,7 @@
           if (res === true) {
             elem.slideUp();
           }
-          if (cb) cb();
+          if (cb) cb(res === true);
         });
       }
     }

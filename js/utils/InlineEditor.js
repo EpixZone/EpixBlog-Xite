@@ -1,95 +1,108 @@
 (function() {
 
+  // Fields share one edit session and one Save/Cancel bar per object.
   class InlineEditor {
     constructor(elem, getContent, saveContent, getObject) {
       this.elem = elem;
       this.getContent = getContent;
       this.saveContent = saveContent;
       this.getObject = getObject;
-
-      this.startEdit = this.startEdit.bind(this);
-      this.saveEdit = this.saveEdit.bind(this);
-      this.deleteObject = this.deleteObject.bind(this);
-      this.cancelEdit = this.cancelEdit.bind(this);
-      this.handleImageSave = this.handleImageSave.bind(this);
-      this.stopEdit = this.stopEdit.bind(this);
-
-      this.edit_button = $("<a href='#Edit' class='editable-edit icon-edit'></a>");
-      this.edit_button.on("click", this.startEdit);
-      this.elem.addClass("editable").before(this.edit_button);
+      this.object = getObject(elem);
       this.editor = null;
+      this.handleImageSave = this.handleImageSave.bind(this);
 
-      var self = this;
-      this.elem.on("mouseenter click", function(e) {
-        self.edit_button.css("opacity", "0.4");
-        var scrolltop = $(window).scrollTop();
-        var top = self.edit_button.offset().top - parseInt(self.edit_button.css("margin-top"));
-        if (scrolltop > top) {
-          self.edit_button.css("margin-top", scrolltop - top + e.clientY - 20);
-        } else {
-          self.edit_button.css("margin-top", "");
-        }
+      var owner = this.object.data("inline-editor");
+      if (!owner) {
+        owner = this;
+        this.fields = [];
+        this.object.data("inline-editor", this).addClass("editable-object");
+        var type = this.object.data("object").split(":")[0];
+        var label = "Edit " + (type === "Site" ? "profile" : type.toLowerCase());
+        this.edit_button = $("<button type='button' class='editable-edit'><span class='icon-edit' aria-hidden='true'></span></button>")
+          .attr({"aria-label": label, title: label}).prependTo(this.object);
+        this.edit_button.on("click", () => this.startEdit());
+      }
+      this.owner = owner;
+      owner.fields.push(this);
+      this.elem.addClass("editable").on("click.inlineedit focus.inlineedit", (e) => {
+        if (InlineEditor.active !== owner || owner.saving) return;
+        e.preventDefault();
+        this.activate();
       });
-      this.elem.on("mouseleave", function() {
-        self.edit_button.css("opacity", "");
-      });
-
-      if (this.elem.is(":hover")) this.elem.trigger("mouseenter");
     }
 
     startEdit() {
-      this.content_before = this.elem.html();
+      if (InlineEditor.active) return false;
+      InlineEditor.active = this;
+      this.saving = false;
+      this.fields.forEach((field) => {
+        field.content_before = field.elem.html();
+        field.raw_before = field.getContent(field.elem, "raw") || "";
+        field.data_before = field.elem.data("content");
+        field.tabindex_before = field.elem.attr("tabindex");
+        field.elem.attr("tabindex", "0").addClass("editing-field");
+      });
+      this.object.addClass("editing-object");
+      $("body").addClass("editing");
+      $(".editbg").css({display: "block", opacity: 0.9});
+      $(".editable-edit").prop("disabled", true);
+      $(".editbar").css("display", "inline-block").addClass("visible");
+      $(".publishbar").css("opacity", 0);
+      $(".editbar .object").text(this.object.data("object") === "Site" ? "Profile" : this.object.data("object"));
+      $(".editbar .button").removeClass("loading");
+      $(".editbar .save").off("click").on("click", () => this.saveEdit());
+      $(".editbar .delete").off("click").on("click", () => this.deleteObject());
+      $(".editbar .cancel").off("click").on("click", () => this.cancelEdit());
+      $(".editbar .delete").toggle(!!this.object.data("deletable"))
+        .text("Delete " + this.object.data("object").split(":")[0].toLowerCase());
+      this.beforeunload = window.onbeforeunload;
+      window.onbeforeunload = function() { return "Your unsaved blog changes will be lost!"; };
 
+      // Capture before routing, rich editor link handlers, or browser navigation.
+      this.blockLinks = (e) => {
+        var link = $(e.target).closest("a[href]");
+        if (!link.length || link.closest(".editbar").length || link.is(".meditor-editmode")) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (e.type === "click" && !this.saving) {
+          var field = $(e.target).closest("[data-editable]").data("editor");
+          if (field && field.owner === this) field.activate();
+        }
+      };
+      ["click", "auxclick", "contextmenu", "dragstart"].forEach((name) => document.addEventListener(name, this.blockLinks, true));
+      this.fields[0].activate();
+      return false;
+    }
+
+    activate() {
+      if (this.owner.saving) return;
+      this.owner.focused = this;
+      if (this.editor) return;
       if (this.elem.data("editable-mode") === "meditor") {
-        this.editor = new Meditor(this.elem[0], this.getContent(this.elem, "raw"));
+        this.editor = new Meditor(this.elem[0], this.raw_before);
         this.editor.handleImageSave = this.handleImageSave;
+        this.editor.onLoad = () => {
+          if (InlineEditor.active === this.owner && !this.owner.saving && this.owner.focused === this) this.editor.focus();
+        };
+        $(this.editor.tag_container).on("focusin", () => { this.owner.focused = this; });
         this.editor.load();
       } else {
         this.editor = $("<textarea class='editor'></textarea>");
-        this.editor.val(this.getContent(this.elem, "raw"));
-        this.elem.after(this.editor);
-
-        this.elem.html([].concat(Array.from({length: 50}, (_, i) => i + 1)).join("fill the width"));
+        var label = this.elem.data("editable").replace(/_/g, " ");
+        this.editor.attr("aria-label", label.charAt(0).toUpperCase() + label.slice(1));
+        this.editor.val(this.raw_before);
+        this.editor.on("focus", () => { this.owner.focused = this; });
         this.copyStyle(this.elem, this.editor);
-        this.elem.html(this.content_before);
-
+        this.elem.after(this.editor).hide();
         this.autoExpand(this.editor);
-        this.elem.css("display", "none");
-
-        if ($(window).scrollTop() === 0) {
-          this.editor[0].selectionEnd = 0;
-          this.editor.focus();
-        }
+        this.editor.focus();
       }
-
-      $(".editbg").css("display", "block").cssLater("opacity", 0.9, 10);
-      $(".editable-edit").css("display", "none");
-
-      $(".editbar").css("display", "inline-block").addClassLater("visible", 10);
-      $(".publishbar").css("opacity", 0);
-      $(".editbar .object").text(this.getObject(this.elem).data("object") + "." + this.elem.data("editable"));
-      $(".editbar .button").removeClass("loading");
-
-      $(".editbar .save").off("click").on("click", this.saveEdit);
-      $(".editbar .delete").off("click").on("click", this.deleteObject);
-      $(".editbar .cancel").off("click").on("click", this.cancelEdit);
-
-      if (this.getObject(this.elem).data("deletable")) {
-        $(".editbar .delete").css("display", "").html("Delete " + this.getObject(this.elem).data("object").split(":")[0]);
-      } else {
-        $(".editbar .delete").css("display", "none");
-      }
-
-      window.onbeforeunload = function() {
-        return 'Your unsaved blog changes will be lost!';
-      };
-
-      return false;
+      this.owner.focused = this;
     }
 
     handleImageSave(name, image_base64uri, el) {
       el.style.opacity = 0.5;
-      var object_name = this.getObject(this.elem).data("object").replace(/[^A-Za-z0-9]/g, "_").toLowerCase();
+      var object_name = this.object.data("object").replace(/[^A-Za-z0-9]/g, "_").toLowerCase();
       var file_path = "data/img/" + object_name + "_" + name;
       Page.cmd("fileWrite", [file_path, image_base64uri.replace(/.*,/, "")], function() {
         el.style.opacity = 1;
@@ -98,112 +111,103 @@
     }
 
     stopEdit() {
-      this.editor.remove();
-      this.editor = null;
-      this.elem.css("display", "").css("z-index", 999).css("position", "relative").cssLater("z-index", "").cssLater("position", "");
-      $(".editbg").css("opacity", 0).cssLater("display", "none");
-
-      $(".editable-edit").css("display", "");
-
-      $(".editbar").cssLater("display", "none", 1000).removeClass("visible");
+      this.fields.forEach((field) => {
+        if (field.editor) field.editor.remove();
+        field.editor = null;
+        field.elem.css("display", "").removeClass("editing-field");
+        if (field.tabindex_before === undefined) field.elem.removeAttr("tabindex");
+        else field.elem.attr("tabindex", field.tabindex_before);
+      });
+      this.object.removeClass("editing-object");
+      $("body").removeClass("editing");
+      $(".editbg").css({display: "none", opacity: 0});
+      $(".editable-edit").prop("disabled", false);
+      $(".editbar").css("display", "none").removeClass("visible");
       $(".publishbar").css("opacity", 1);
-
-      window.onbeforeunload = null;
+      ["click", "auxclick", "contextmenu", "dragstart"].forEach((name) => document.removeEventListener(name, this.blockLinks, true));
+      window.onbeforeunload = this.beforeunload;
+      InlineEditor.active = null;
+      this.edit_button.focus();
     }
 
     saveEdit() {
-      var self = this;
-      var content = this.editor.val();
+      if (this.saving) return false;
+      var changes = this.fields.filter((field) => field.editor && field.editor.val() !== field.raw_before)
+        .map((field) => ({field: field, elem: field.elem, content: field.editor.val()}));
+      if (!changes.length) {
+        this.stopEdit();
+        return false;
+      }
+      this.saving = true;
+      this.setReadOnly(true);
       $(".editbar .save").addClass("loading");
-      this.saveContent(this.elem, content, function(content_html) {
-        if (content_html) {
-          $(".editbar .save").removeClass("loading");
-          self.stopEdit();
-          if (typeof content_html === "string") {
-            self.elem.html(content_html);
-          }
-          $('pre code').each(function(i, block) {
-            hljs.highlightBlock(block);
-          });
-          Page.addImageZoom(self.elem);
-        } else {
-          $(".editbar .save").removeClass("loading");
-        }
-      });
+      var complete = (results) => {
+        this.saving = false;
+        this.setReadOnly(false);
+        $(".editbar .save").removeClass("loading");
+        if (results === false) return;
+        this.stopEdit();
+        changes.forEach((change, i) => change.elem.html(results[i]));
+        this.object.find("pre code").each(function(i, block) { hljs.highlightBlock(block); });
+        Page.addImageZoom(this.object);
+        Page.cleanupImages();
+      };
+      if (this.object.data("object").split(":")[0] === "Comment") {
+        var change = changes[0];
+        change.field.saveContent(change.elem, change.content, (html) => complete(html === false ? false : [html]));
+      } else {
+        Page.saveObjectFields(this.object, changes, complete);
+      }
       return false;
     }
 
+    setReadOnly(readOnly) {
+      this.object.toggleClass("saving-object", readOnly);
+      this.fields.forEach((field) => {
+        if (!field.editor) return;
+        if (field.editor instanceof Meditor) {
+          field.editor.setReadOnly(readOnly);
+        } else field.editor.prop("readOnly", readOnly);
+      });
+    }
+
     deleteObject() {
-      var self = this;
-      var object_type = this.getObject(this.elem).data("object").split(":")[0];
-      Page.cmd("wrapperConfirm", ["Are you sure you sure to delete this " + object_type + "?", "Delete"], function(confirmed) {
+      if (this.saving) return false;
+      var object_type = this.object.data("object").split(":")[0].toLowerCase();
+      this.saving = true;
+      Page.cmd("wrapperConfirm", ["Are you sure you want to delete this " + object_type + "?", "Delete"], (confirmed) => {
+        if (!confirmed) { this.saving = false; return; }
         $(".editbar .delete").addClass("loading");
-        Page.saveContent(self.getObject(self.elem), null, function() {
-          self.stopEdit();
+        Page.deleteObject(this.object, (saved) => {
+          this.saving = false;
+          $(".editbar .delete").removeClass("loading");
+          if (saved !== false) this.stopEdit();
         });
       });
       return false;
     }
 
     cancelEdit() {
+      if (this.saving) return false;
       this.stopEdit();
-      this.elem.html(this.content_before);
-
-      $('pre code').each(function(i, block) {
-        hljs.highlightBlock(block);
-      });
-
+      this.fields.forEach((field) => field.elem.html(field.content_before).data("content", field.data_before));
+      this.object.find("pre code").each(function(i, block) { hljs.highlightBlock(block); });
+      Page.addImageZoom(this.object);
       Page.cleanupImages();
       return false;
     }
 
     copyStyle(elem_from, elem_to) {
-      elem_to.addClass(elem_from[0].className);
       var from_style = getComputedStyle(elem_from[0]);
-
-      elem_to.css({
-        fontFamily: from_style.fontFamily,
-        fontSize: from_style.fontSize,
-        fontWeight: from_style.fontWeight,
-        marginTop: from_style.marginTop,
-        marginRight: from_style.marginRight,
-        marginBottom: from_style.marginBottom,
-        marginLeft: from_style.marginLeft,
-        paddingTop: from_style.paddingTop,
-        paddingRight: from_style.paddingRight,
-        paddingBottom: from_style.paddingBottom,
-        paddingLeft: from_style.paddingLeft,
-        lineHeight: from_style.lineHeight,
-        textAlign: from_style.textAlign,
-        color: from_style.color,
-        letterSpacing: from_style.letterSpacing
-      });
-
-      if (elem_from.innerWidth() < 1000) {
-        elem_to.css("minWidth", elem_from.innerWidth());
-      }
+      ["fontFamily", "fontSize", "fontWeight", "marginTop", "marginRight", "marginBottom", "marginLeft",
+        "paddingTop", "paddingRight", "paddingBottom", "paddingLeft", "lineHeight", "textAlign", "color", "letterSpacing"]
+        .forEach((key) => elem_to.css(key, from_style[key]));
     }
 
     autoExpand(elem) {
-      var editor = elem[0];
-      elem.height(1);
       elem.on("input", function() {
-        if (editor.scrollHeight > elem.height()) {
-          elem.height(1).height(editor.scrollHeight + parseFloat(elem.css("borderTopWidth")) + parseFloat(elem.css("borderBottomWidth")));
-        }
-      });
-      elem.trigger("input");
-
-      // Tab key support
-      elem.on('keydown', function(e) {
-        if (e.which === 9) {
-          e.preventDefault();
-          var s = this.selectionStart;
-          var val = elem.val();
-          elem.val(val.substring(0, this.selectionStart) + "\t" + val.substring(this.selectionEnd));
-          this.selectionEnd = s + 1;
-        }
-      });
+        elem.height(1).height(this.scrollHeight);
+      }).trigger("input");
     }
   }
 

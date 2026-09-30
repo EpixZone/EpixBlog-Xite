@@ -4,6 +4,7 @@
     constructor(tag) {
       this.tag = tag;
       var editor = AlloyEditor.editable(this.tag);
+      this.editor = editor;
 
       // Add top padding to avoid toolbar movement
       var el = editor._editor.element.$;
@@ -27,6 +28,7 @@
 
       // Add listeners
       var self = this;
+      editor.get('nativeEditor').on("instanceReady", () => this.setReadOnly(!!this.readOnly));
       editor.get('nativeEditor').on("selectionChange", this.handleSelectionChange);
       editor.get('nativeEditor').on("focus", function(e) {
         setTimeout(function() {
@@ -55,6 +57,18 @@
       this.image_resize_height = 900;
       this.image_preverse_ratio = true;
       this.image_try_png = false;
+    }
+
+    setReadOnly(readOnly) {
+      this.readOnly = readOnly;
+      if (this.destroyed) return;
+      var native = this.editor.get("nativeEditor");
+      if (native && native.editable()) native.setReadOnly(readOnly);
+    }
+
+    destroy() {
+      this.destroyed = true;
+      this.editor.destroy();
     }
 
     calcSize(source_width, source_height, target_width, target_height) {
@@ -121,6 +135,7 @@
     }
 
     handleImageAdd(e) {
+      if (this.destroyed) return;
       var name;
       if (e.data.file.name) {
         name = e.data.file.name.replace(/[^\w\.-]/gi, "_");
@@ -215,6 +230,7 @@
     }
 
     handleSelectionChange(e) {
+      if (this.destroyed) return;
       if (this.el_last_created && this.el_last_created.getText().replace(/\u200B/g, '').trim() !== "") {
         this.el_last_created.removeClass("empty");
         this.el_last_created = null;

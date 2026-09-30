@@ -4,9 +4,10 @@
     constructor(tag_original, body) {
       this.tag_original = tag_original;
       // The rail links field is too small for the full markdown toolbar;
-      // it keeps the classic rich-first flow with the plain textarea.
+      // it uses a compact plain textarea for markdown.
       this.simple = tag_original.classList.contains("links");
       this.mde = null;
+      this.removed = false;
       // The raw stored markdown: used verbatim for the automatic first switch
       // to markdown mode, so opening the editor does not normalize the
       // author's markdown through an html round-trip.
@@ -19,8 +20,11 @@
       this.tag_container.insertAdjacentHTML('afterBegin', this.tag_original.outerHTML);
       this.tag_original.style.display = "none";
       this.tag = this.tag_container.firstChild;
+      this.tag.removeAttribute("data-editable");
+      this.tag.removeAttribute("tabindex");
+      this.tag.removeAttribute("id");
 
-      if (body) {
+      if (typeof body === "string") {
         this.tag.innerHTML = marked(body, {gfm: true, breaks: true});
       }
 
@@ -30,23 +34,31 @@
     }
 
     load() {
-      if (!window.AlloyEditor) {
-        var style = document.createElement("link");
-        style.href = "alloy-editor/all.css";
-        style.rel = "stylesheet";
-        document.head.appendChild(style);
-
-        var script = document.createElement("script");
-        script.src = "alloy-editor/all.js";
-        document.head.appendChild(script);
-
-        script.onload = this.handleEditorLoad;
-      } else {
+      if (window.AlloyEditor) {
         this.handleEditorLoad();
+        return;
       }
+      if (!Meditor.loading) {
+        Meditor.loading = new Promise(function(resolve, reject) {
+          var style = document.createElement("link");
+          style.href = "alloy-editor/all.css";
+          style.rel = "stylesheet";
+          document.head.appendChild(style);
+          var script = document.createElement("script");
+          script.src = "alloy-editor/all.js";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      Meditor.loading.then(() => this.handleEditorLoad(), () => {
+        Meditor.loading = null;
+        this.handleEditorLoad();
+      });
     }
 
     handleEditorLoad() {
+      if (this.removed || this.tag_markdown) return;
       var self = this;
       // Create rich text<>markdown edit mode switch button
       this.tag.insertAdjacentHTML('beforeBegin', "<a href='#Markdown' class='meditor-editmode'></a>");
@@ -55,13 +67,22 @@
       this.updateEditmodeLabel();
 
       // Create ckeditor
-      this.editor = new CustomAlloyEditor(this.tag);
-      if (this.handleImageSave) this.editor.handleImageSave = this.handleImageSave;
+      if (window.AlloyEditor) {
+        this.editor = new CustomAlloyEditor(this.tag);
+        if (this.handleImageSave) this.editor.handleImageSave = this.handleImageSave;
+      } else {
+        this.tag_editmode.style.display = "none";
+      }
 
       // Create markdown editor textfield
       this.tag.insertAdjacentHTML('beforeBegin', this.tag_original.outerHTML);
       this.tag_markdown = this.tag.previousSibling;
-      this.tag_markdown.innerHTML = "<textarea class='meditor-markdown'>MARKDOWN</textarea>";
+      this.tag_markdown.removeAttribute("data-editable");
+      this.tag_markdown.removeAttribute("tabindex");
+      this.tag_markdown.removeAttribute("id");
+      this.tag_markdown.innerHTML = "<textarea class='meditor-markdown'></textarea>";
+      var label = this.tag_original.getAttribute("data-editable") || "body";
+      this.tag_markdown.firstChild.setAttribute("aria-label", label.charAt(0).toUpperCase() + label.slice(1));
       this.autoHeight(this.tag_markdown.firstChild);
       this.tag_markdown.firstChild.oninput = function() {
         if (self.mde) return; // EasyMDE/CodeMirror sizes itself
@@ -70,14 +91,14 @@
 
       this.tag_markdown.style.display = "none";
 
-      // Markdown is the storage format, so the markdown editor (with its
-      // formatting toolbar) is the default mode; the toggle switches to the
-      // rich text view. The rail links field keeps the classic rich default.
-      if (window.EasyMDE && !this.simple) this.handleEditmodeChange(null, this.initial_markdown);
+      // Always begin with the stored source, including compact profile links.
+      // This also gives a usable plain editor if the rich editor failed to load.
+      this.handleEditmodeChange(null, this.initial_markdown);
+      this.setReadOnly(!!this.readOnly);
 
       // Call onLoad for external scripts
       setTimeout(function() {
-        if (self.onLoad) self.onLoad();
+        if (!self.removed && self.onLoad) self.onLoad();
       }, 1);
     }
 
@@ -96,7 +117,7 @@
       var mde = new EasyMDE({
         element: textarea,
         spellChecker: false,
-        autofocus: true,
+        autofocus: false,
         status: false,
         forceSync: true, // keeps textarea.value fresh for getMarkdown()/val()
         tabSize: 2,
@@ -141,27 +162,32 @@
     }
 
     getMarkdown() {
+      if (!this.tag_editmode) return this.initial_markdown || "";
       if (this.tag_editmode.classList.contains("markdown")) {
-        return this.tag_markdown.firstChild.value;
+        return this.mde ? this.mde.value() : this.tag_markdown.firstChild.value;
       } else {
+        if (this.tag.innerHTML === this.rich_snapshot) return this.rich_markdown;
         return toMarkdown(this.tag.innerHTML, {gfm: true});
       }
     }
 
     getHtml() {
       if (this.tag_editmode.classList.contains("markdown")) {
-        return marked(this.tag_markdown.firstChild.value, {gfm: true, breaks: true});
+        return marked(this.getMarkdown(), {gfm: true, breaks: true});
       } else {
         return marked(this.getMarkdown(), {gfm: true, breaks: true});
       }
     }
 
     handleEditmodeChange(e, preset_markdown) {
+      if (e && this.readOnly) return false;
       if (this.tag_editmode.classList.contains("markdown")) {
         // Change to ckeditor
         this.tag_markdown.style.display = "none";
         this.tag.style.display = "";
+        this.rich_markdown = this.getMarkdown();
         this.tag.innerHTML = this.getHtml();
+        this.rich_snapshot = this.tag.innerHTML;
       } else {
         // Change to markdown. preset_markdown (the untouched stored source)
         // is only passed by the automatic switch right after load.
@@ -181,7 +207,7 @@
             this.mde = this.createMde(textarea);
           }
           var mde = this.mde;
-          setTimeout(function() { mde.codemirror.refresh() }, 1);
+          setTimeout(() => { if (!this.removed) mde.codemirror.refresh(); }, 1);
         } else {
           textarea.value = markdown;
           this.autoHeight(textarea);
@@ -196,16 +222,32 @@
       this.tag_original.innerHTML = this.getHtml();
     }
 
+    setReadOnly(readOnly) {
+      this.readOnly = readOnly;
+      if (this.mde) this.mde.codemirror.setOption("readOnly", readOnly);
+      if (this.tag_markdown) this.tag_markdown.firstChild.readOnly = readOnly;
+      if (this.editor) this.editor.setReadOnly(readOnly);
+    }
+
+    focus() {
+      if (this.removed || !this.tag_markdown) return;
+      if (this.tag_editmode.classList.contains("markdown")) {
+        if (this.mde) this.mde.codemirror.focus();
+        else this.tag_markdown.firstChild.focus();
+      } else {
+        this.tag.focus();
+      }
+    }
+
     remove() {
+      this.removed = true;
       if (this.mde) {
-        // releases CodeMirror's document-level listeners before the DOM goes
         this.mde.toTextArea();
         this.mde = null;
       }
-      this.tag_editmode.remove();
-      this.tag_markdown.remove();
+      if (this.editor) this.editor.destroy();
       this.tag_original.style.display = "";
-      this.tag.remove();
+      this.tag_container.remove();
     }
 
     val() {
