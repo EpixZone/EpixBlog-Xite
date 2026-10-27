@@ -14,7 +14,12 @@
         this.hide();
       } else {
         var button_pos = this.button.offset();
-        this.elem.css({"top": button_pos.top + this.button.outerHeight(), "left": button_pos.left + this.button.outerWidth() - this.elem.outerWidth()});
+        var menu_width = this.elem.outerWidth();
+        var viewport_left = window.scrollX || 0;
+        var preferred_left = button_pos.left + this.button.outerWidth() - menu_width;
+        var left = Math.max(viewport_left + 8, Math.min(preferred_left,
+          viewport_left + document.documentElement.clientWidth - menu_width - 8));
+        this.elem.css({"top": button_pos.top + this.button.outerHeight(), "left": left});
         this.button.addClass("menu-active");
         this.elem.addClass("visible");
         if (window.visible_menu) window.visible_menu.hide();

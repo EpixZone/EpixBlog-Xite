@@ -388,5 +388,5 @@
  "signs_required": 1,
  "title": "Epix Blog",
  "translate": ["index.html","js/EpixBlog.js","js/Comments.js","js/utils/User.js","js/utils/Translate.js","js/utils/Text.js","js/utils/InlineEditor.js","js/utils/Follow.js","alloy-editor/all.js"],
- "viewport": "width=device-width, initial-scale=0.8"
+ "viewport": "width=device-width, initial-scale=1"
 }

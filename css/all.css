@@ -727,8 +727,8 @@ img.zoom-img { cursor: pointer; cursor: -webkit-zoom-out; cursor: zoom-out }
 
 	/* Identity rail becomes a compact header row:
 	   [menu] [avatar] [title + follow]  /  description  /  collapsed extras.
-	   96px clears the unscaled wrapper button at the manifest's 0.8 initial
-	   scale. Owners need another 52px inside this inset for the edit button. */
+	   Reserve room for the wrapper button and a gap, including older clones
+	   at 0.8 scale. Owners need another 52px for the profile edit button. */
 	.left {
 		--wrapper-inset: 96px;
 		position: static; display: flex; flex-wrap: wrap; align-items: center;
