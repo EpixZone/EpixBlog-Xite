@@ -59,7 +59,7 @@ MIT
 
 ## Tests
 
-Run the dependency-free loading and login tests with `node --test tests/*.test.cjs`.
+Run the dependency-free loading, login and avatar tests with `node --test tests/*.test.cjs`.
 
 The editing browser suite uses the real page and editor libraries with an in-memory EpixFrame file store. It covers grouped saves, cancel/retry behavior, lazy loading, navigation blocking, comment saves, mobile controls, and selection-based formatting in both editor views:
 

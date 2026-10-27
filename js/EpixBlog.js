@@ -1061,14 +1061,22 @@
 
     setSiteinfo(site_info) {
       var self = this;
-      if (this.site_info && site_info) {
-        var previous = this.site_info;
+      var previous = this.site_info;
+      var incoming_event = site_info?.event;
+      if (previous && site_info) {
         site_info = Object.assign({}, previous, site_info);
         site_info.settings = Object.assign({}, previous.settings, site_info.settings);
       }
       this.site_info = site_info;
       this.event_site_info.resolve(site_info);
-      if ($("body").hasClass("page-post")) User.checkCert();
+      var post_page = $("body").hasClass("page-post");
+      var identity_changed = !previous || previous.auth_address !== site_info.auth_address ||
+        previous.cert_user_id !== site_info.cert_user_id;
+      if (post_page || identity_changed || incoming_event?.[0] === "cert_changed") {
+        // Show the selected reader's badge on the homepage too, without
+        // opening the identity picker just because someone is reading.
+        User.checkCert({ prompt: post_page });
+      }
       // Refresh when a user's data.json OR any of their signed-CRDT merge files
       // (comments/votes) syncs from a peer, so peer-driven changes show live.
       if (site_info.event && site_info.event[0] === "file_done" && site_info.event[1].match(/.*users.*\/(data|comments|comment_votes|post_votes)\.json$/)) {
