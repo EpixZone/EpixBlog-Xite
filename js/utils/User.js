@@ -11,6 +11,7 @@
       this.xid_loading = false;
       this.xid_lookup = null;
       this.xid_address = null;
+      this.xid_cert = null;
       this.xid_connecting = false;
       this.xid_connect_callbacks = [];
       this.xid_prompt_shown = false;
@@ -63,13 +64,20 @@
       if (lookup) for (var callback of lookup.callbacks) callback(null, true);
     }
 
+    clearXidProfile() {
+      this.xid_name = this.xid_tld = this.xid_address = this.xid_cert = this.xid_avatar = null;
+      $(".certselect.user_name").text("Connect xID").css("color", "#f39c12");
+      $(".comment-new").addClass("comment-nocert");
+      this.showXidFab();
+    }
+
     // Resolve and store my own xID name
     resolveMyXidName(cb) {
       var address = Page.site_info?.auth_address;
       var cert = Page.site_info?.cert_user_id;
       if (!address || !cert) {
         this.cancelXidLookup();
-        this.xid_name = this.xid_tld = this.xid_address = null;
+        this.clearXidProfile();
         if (cb) cb(null);
         return;
       }
@@ -78,6 +86,7 @@
         return;
       }
       this.cancelXidLookup();
+      if (this.xid_address !== address || this.xid_cert !== cert) this.clearXidProfile();
       var lookup = { address, cert, callbacks: cb ? [cb] : [] };
       this.xid_lookup = lookup;
       this.xid_loading = true;
@@ -90,6 +99,7 @@
           return;
         }
         this.xid_address = address;
+        this.xid_cert = cert;
         this.xid_name = name;
         this.xid_tld = tld;
         this.xid_avatar = avatar || "";
@@ -97,48 +107,37 @@
       });
     }
 
-    checkCert(type) {
+    checkCert(options) {
       var self = this;
-      if (!Page.site_info?.cert_user_id) {
-        this.xid_name = this.xid_tld = this.xid_address = null;
+      var prompt = options?.prompt !== false;
+      if (!Page.site_info?.auth_address || !Page.site_info.cert_user_id) {
         this.cancelXidLookup();
-      }
-      if (Page.site_info?.auth_address) {
-        if (!Page.site_info.cert_user_id) {
-          $(".certselect.user_name").text("Connect xID").css("color", "#f39c12");
-          $(".comment-new").addClass("comment-nocert");
-          this.showXidFab();
-          if (!this.xid_prompt_shown) {
-            this.xid_prompt_shown = true;
-            this.triggerCertXid();
-          }
-        } else {
-          this.resolveMyXidName(function(name, cancelled) {
-            if (cancelled) return;
-            if (name) {
-              var display = name + "." + self.xid_tld;
-              $(".certselect.user_name").text(display).css("color", Text.toColor(display));
-              $(".comment-new").removeClass("comment-nocert");
-              self.showXidTag(display);
-            } else {
-              $(".certselect.user_name").text("Connect xID").css("color", "#f39c12");
-              $(".comment-new").addClass("comment-nocert");
-              self.showXidFab();
-              if (!self.xid_prompt_shown) {
-                self.xid_prompt_shown = true;
-                self.triggerCertXid();
-              }
-            }
-          });
-          var user_dir = Page.site_info.xid_directory || Page.site_info.auth_address;
-          Page.cmd("fileRules", "data/users/" + user_dir + "/content.json", function(rules) {
-            self.rules = rules;
-          });
+        this.clearXidProfile();
+        if (Page.site_info?.auth_address && prompt && !this.xid_prompt_shown) {
+          this.xid_prompt_shown = true;
+          this.triggerCertXid();
         }
-      } else {
-        $(".comment-new").addClass("comment-nocert");
-        $(".certselect.user_name").text("Connect xID");
+        return;
       }
+      this.resolveMyXidName(function(name, cancelled) {
+        if (cancelled) return;
+        if (name) {
+          var display = name + "." + self.xid_tld;
+          $(".certselect.user_name").text(display).css("color", Text.toColor(display));
+          $(".comment-new").removeClass("comment-nocert");
+          self.showXidTag(display);
+        } else {
+          self.clearXidProfile();
+          if (prompt && !self.xid_prompt_shown) {
+            self.xid_prompt_shown = true;
+            self.triggerCertXid();
+          }
+        }
+      });
+      var user_dir = Page.site_info.xid_directory || Page.site_info.auth_address;
+      Page.cmd("fileRules", "data/users/" + user_dir + "/content.json", function(rules) {
+        self.rules = rules;
+      });
     }
 
     triggerCertXid(cb) {
@@ -196,17 +195,28 @@
       var bgColor = "hsl(" + hue + ", 50%, 25%)";
       var textColor = "hsl(" + hue + ", 80%, 80%)";
       var avatar = this.xid_avatar;
-      var tag;
-      if (avatar) {
-        tag = $('<a href="#" class="xid-tag nolink" style="display: inline-block; padding: 4px 10px; background: ' + bgColor + '; cursor: pointer; text-decoration: none; border-radius: 8px; margin-left: 10px; vertical-align: middle;">' +
-          '<img src="' + avatar + '" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid ' + textColor + '; vertical-align: middle; margin-right: 4px;" onerror="this.style.display=\'none\'">' +
-          '<span style="color: ' + textColor + '; font-size: 12px; font-family: consolas, menlo, monospace;">' + display + '</span>' +
-          '</a>');
-      } else {
-        tag = $('<a href="#" class="xid-tag nolink" style="display: inline-block; padding: 6px 12px; background: ' + bgColor + '; cursor: pointer; text-decoration: none; border-radius: 8px; margin-left: 10px;">' +
-          '<span style="color: ' + textColor + '; font-size: 12px; font-family: consolas, menlo, monospace;">' + display + '</span>' +
-          '</a>');
+      var tag = $('<a href="#" class="xid-tag nolink"></a>').css({
+        "display": "inline-block", "padding": "6px 12px", "background": bgColor,
+        "cursor": "pointer", "text-decoration": "none", "border-radius": "8px",
+        "margin-left": "10px", "vertical-align": "middle"
+      });
+      if (typeof avatar === "string" && avatar) {
+        tag.css("padding", "4px 10px");
+        var image = $('<img class="xid-avatar" alt="">').css({
+          "width": "20px", "height": "20px", "border-radius": "50%", "object-fit": "cover",
+          "border": "1px solid " + textColor, "vertical-align": "middle", "margin-right": "4px"
+        }).on("error", function() {
+          $(this).remove();
+          tag.css("padding", "6px 12px");
+        });
+        // Match the xID profile's image URL contract without parsing profile
+        // values as markup or rewriting them through a third-party gateway.
+        image.attr({ "src": avatar, "referrerpolicy": "no-referrer" });
+        tag.append(image);
       }
+      tag.append($("<span></span>").text(display).css({
+        "color": textColor, "font-size": "12px", "font-family": "consolas, menlo, monospace"
+      }));
       $(".left h1").after(tag);
     }
 
