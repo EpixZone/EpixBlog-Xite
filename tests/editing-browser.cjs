@@ -61,6 +61,10 @@ const server = http.createServer((req, res) => {
   const pathname = new URL(req.url, "http://localhost").pathname;
   const name = pathname === "/" ? "index.html" : pathname.slice(1);
   if (name.includes("..")) { res.writeHead(400).end(); return; }
+  if (name === "img/avatar.svg" && !req.headers.referer) {
+    res.writeHead(403).end("Cross-origin request blocked");
+    return;
+  }
   try {
     let content;
     if (name === "alloy-editor/all.js") {
@@ -112,6 +116,23 @@ const server = http.createServer((req, res) => {
     await page.waitForFunction(() => !document.querySelector("textarea.editor, .meditor"));
   }
   try {
+    await page.goto(origin + "index.html");
+    await page.waitForFunction(() => window.testReady);
+    const headerLogo = page.locator(".avatar-link img.avatar");
+    assert.equal(await headerLogo.evaluate(img => img.naturalWidth), 72, "the gateway can serve the initial local logo");
+    const missingAvatar = "https://avatar.example.invalid/missing.png";
+    await page.route(missingAvatar, route => route.fulfill({ status: 404, body: "" }));
+    const failedAvatar = page.waitForRequest(missingAvatar);
+    await page.evaluate(source => {
+      Page.blogLogo.display(source, true);
+      Page.blogLogo.fallback = "img/avatar.svg?retry";
+    }, missingAvatar);
+    assert.equal((await (await failedAvatar).allHeaders()).referer, undefined, "the profile host gets no referrer");
+    await page.waitForFunction(() => {
+      const img = document.querySelector(".avatar-link img.avatar");
+      return img.src.endsWith("/img/avatar.svg?retry") && img.complete && img.naturalWidth === 72;
+    }, null, { timeout: 3000 });
+    console.log("PASS gateway local logo on first paint and after a failed profile image");
     await reset();
     assert.equal(await page.locator(".editable-edit:visible").count(), 3, "one pencil per post and profile");
     assert.equal(await page.locator("#post_1 > .editable-edit").evaluate(el => {
