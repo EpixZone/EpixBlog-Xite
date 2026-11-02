@@ -40,6 +40,10 @@ epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f/
         └── content-default.json
 ```
 
+## Blog logo
+
+A blog using the template logo shows its domain's xID avatar when the signed domain points back to the blog. Owners can open **Blog logo** in the sidebar (under the menu on mobile) to choose their own xID avatar or upload an image. Use **Sign & Publish new content** to share the logo with readers. **Use blog default** restores the original behavior.
+
 ## Database
 
 - **File:** `data/epixblog.db`

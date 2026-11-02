@@ -9,6 +9,9 @@
       this.page = 1;
       this.my_post_votes = {};
       this.initial_load = true;
+      if (window.BlogLogo && document.querySelector(".blog-logo-controls") && document.querySelector(".avatar-link img.avatar")) {
+        this.blogLogo = new BlogLogo(this);
+      }
 
       this.event_page_load = $.Deferred();
       this.event_site_info = $.Deferred();
@@ -42,9 +45,6 @@
 
       $.when(this.event_site_info).done(function() {
         self.log("event site info");
-        // Set avatar
-        var imagedata = new Identicon(self.site_info.address, 70).toString();
-        $("body").append("<style>.avatar { background-image: url(data:image/png;base64," + imagedata + ") }</style>");
         self.initFollowButton();
       });
 
@@ -105,6 +105,7 @@
         }
         // Re-evaluate against the data that just loaded, so a bar shown
         // from a stale mid-update read converges instead of sticking.
+        self.blogLogo?.refresh();
         self.checkPublishbar();
         if (cb) cb();
       });
@@ -392,7 +393,7 @@
       // races the siteInfo still carrying the previous content.json stamp,
       // so the condition flipped true and the bar stuck until the next event.
       var can_sign = this.site_info && (this.site_info.settings.own || this.site_info.privatekey);
-      if (can_sign && this.data != null && (!this.data["modified"] || this.data["modified"] > this.site_info.content.modified)) {
+      if (can_sign && this.data != null && (this.blogLogo?.pendingPublish || !this.data["modified"] || this.data["modified"] > this.site_info.content.modified)) {
         $(".publishbar").addClass("visible");
       } else {
         $(".publishbar").removeClass("visible");
@@ -401,16 +402,22 @@
 
     publish() {
       var self = this;
+      var logoChange = this.blogLogo?.pendingPublish;
+      var published = function(res) {
+        self.log("Publish result:", res);
+        if (res === "ok" && logoChange && self.blogLogo.pendingPublish === logoChange) {
+          self.blogLogo.pendingPublish = null;
+          self.checkPublishbar();
+        }
+      };
       if (this.site_info.privatekey) {
-        this.cmd("sitePublish", ["stored"], function(res) {
-          self.log("Publish result:", res);
-        });
+        this.cmd("sitePublish", ["stored"], published);
       } else {
         this.cmd("wrapperPrompt", ["Enter your private key:", "password"], function(privatekey) {
           $(".publishbar .button").addClass("loading");
           self.cmd("sitePublish", [privatekey], function(res) {
             $(".publishbar .button").removeClass("loading");
-            self.log("Publish result:", res);
+            published(res);
           });
         });
       }
@@ -701,16 +708,17 @@
       }
     }
 
-    writeData(data, cb) {
+    writeBlogData(data, cb) {
       var self = this;
       if (!cb) cb = null;
       if (!data) {
         return this.log("Data missing");
       }
-      this.data["modified"] = data.modified = Time.timestamp();
+      data.modified = Time.timestamp();
       var json_raw = unescape(encodeURIComponent(JSON.stringify(data, undefined, '\t')));
       this.cmd("fileWrite", ["data/data.json", btoa(json_raw)], function(res) {
         if (res === "ok") {
+          self.data.modified = data.modified;
           if (cb) cb(true);
         } else {
           self.cmd("wrapperNotification", ["error", "File write error: " + res]);
@@ -718,7 +726,12 @@
         }
         self.checkPublishbar();
       });
+    }
 
+    writeData(data, cb) {
+      var self = this;
+      if (!data) return this.log("Data missing");
+      this.writeBlogData(data, cb);
       // Updating title in content.json
       this.cmd("fileGet", ["content.json"], function(content) {
         content = content.replace(/"title": ".*?"/, '"title": "' + data.title + '"');
@@ -1067,6 +1080,8 @@
         site_info.settings = Object.assign({}, previous.settings, site_info.settings);
       }
       this.site_info = site_info;
+      this.blogLogo?.refresh(incoming_event?.[0] === "file_done" &&
+        (incoming_event[1] === "img/avatar.svg" || incoming_event[1] === "content.json"));
       this.event_site_info.resolve(site_info);
       var post_page = $("body").hasClass("page-post");
       var identity_changed = !previous || previous.auth_address !== site_info.auth_address ||

@@ -1,7 +1,7 @@
 {
 	"db_name": "EpixBlog",
 	"db_file": "data/epixblog.db",
-	"version": 2,
+	"version": 3,
 	"maps": {
 		"users/.+/comments.json": {
 			"to_table": [
@@ -46,6 +46,8 @@
 				"title",
 				"description",
 				"links",
+				"owner_xid",
+				"logo_image",
 				"next_post_id",
 				"demo",
 				"modified"
