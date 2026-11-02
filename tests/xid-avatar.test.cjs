@@ -4,6 +4,8 @@ const path = require("node:path");
 const test = require("node:test");
 const vm = require("node:vm");
 
+const wrapperOrigin = "https://blog.epix";
+
 function setup(pageClass = "page-main", embedded = false) {
   const nodes = [], calls = [];
   function node(tag, attrs = {}, parent = null) {
@@ -93,7 +95,7 @@ function setup(pageClass = "page-main", embedded = false) {
     $, LogMixin: { log() {} }, Text: { toColor: () => "purple" }, setTimeout() {},
   });
   context.window.parent = embedded ? { postMessage(message, target, [port]) {
-    calls.push({ command: message.cmd, params: message.params, cb(value) { port.postMessage(value); port.close(); } });
+    calls.push({ command: message.cmd, params: message.params, target, cb(value) { port.postMessage(value); port.close(); } });
   } } : context.window;
   context.MessageChannel = MessageChannel;
   context.URL = URL;
@@ -109,7 +111,7 @@ function setup(pageClass = "page-main", embedded = false) {
     site_info: null, event_site_info: { resolve() {} },
     cmd(command, params, cb) {
       if (command === "fileRules") return cb({});
-      if (command === "wrapperAvatarThumbnailVersion") return cb(1);
+      if (command === "wrapperAvatarThumbnailVersion") return cb({ version: 1, origin: wrapperOrigin });
       calls.push({ command, params, cb });
     },
     initFollowButton() { this.follow = { feeds: {} }; }, migrateRecords() {},
@@ -260,6 +262,7 @@ test("an embedded reader badge displays the node thumbnail for its 20px slot", {
   take("xidResolve").cb(profile("alice"));
   await new Promise(setImmediate);
   const request = take("wrapperGetAvatarThumbnail");
+  assert.equal(request.target, wrapperOrigin);
   assert.equal(request.params.url, profile("alice").avatar);
   assert.equal(request.params.size, 20);
   const image = find("img")[0];
