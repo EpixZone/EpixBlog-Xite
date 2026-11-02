@@ -65,14 +65,21 @@
 <!-- left -->
 <div class="left" data-object="Site">
  <a href="#Show+more" class="left-more-link"></a>
- <a href="?Home" class="nolink avatar-link">
-    <img class="avatar" src="img/avatar.svg" alt="">
+ <a href="?Home" class="nolink avatar-link" aria-label="Blog home">
+    <img class="avatar" src="img/avatar.svg" alt="" referrerpolicy="no-referrer">
  </a>
  <h1><a href="?Home" class="nolink" data-editable="title" data-editable-mode="simple"></a></h1>
  <a href="#Follow" class="feed-follow"><span class='text-follow'>Follow in Newsfeed</span><span class='text-following'>Following</span><div class="icon-feed"></div></a>
  <h2 data-editable="description" class="description"></h2>
  <div class="left-more">
   <hr>
+  <fieldset class="blog-logo-controls" hidden>
+   <legend>Blog logo</legend>
+   <button type="button" class="use-owner-xid">Use my xID avatar</button>
+   <label>Upload a logo <input class="blog-logo-file" type="file" accept="image/png,image/jpeg,image/webp"></label>
+   <button type="button" class="reset-blog-logo" hidden>Use blog default</button>
+   <small>Sign and publish to share your changes.</small>
+  </fieldset>
   <div class="links" data-editable="links" data-editable-mode="meditor"></div>
 
   <!-- Last comments -->
@@ -220,6 +227,7 @@
 <script src="js/utils/CustomAlloyEditor.js"></script>
 <script src="js/utils/InlineEditor.js"></script>
 <script src="js/utils/User.js"></script>
+<script src="js/utils/BlogLogo.js"></script>
 <script src="js/utils/Follow.js"></script>
 
 <!-- App -->

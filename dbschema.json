@@ -46,6 +46,8 @@
 				"title",
 				"description",
 				"links",
+				"owner_xid",
+				"logo_image",
 				"next_post_id",
 				"demo",
 				"modified"
