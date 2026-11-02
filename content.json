@@ -9,13 +9,13 @@
    "seq": 1,
    "size": 284691
   },
-  "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca": {
+  "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c": {
    "seq": 0,
    "size": 230218
   },
-  "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190": {
+  "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e": {
    "seq": 2,
-   "size": 69047
+   "size": 70474
   }
  },
  "clone_root": "",
@@ -42,21 +42,21 @@
  "files": {
   "LICENSE": {
    "b3": "e5d78c01bf8de96db29343a9f6771e6eaf18b2392057cea340d985e9e75fb264",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 0,
    "sha512": "e67014a69caa38c58575f333619243c9ebb3c98d462f0b4823ff5ed3d2cfdba3",
    "size": 1077
   },
   "README.md": {
    "b3": "8fc207cf98fb515730d3ddf94cbc8999c3691652955b2a7a7cbb53c307e773bb",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 1077,
    "sha512": "915ee18b6cb3b3ecfe49d0f48f8c99a14f9948720c6996b9b74317b1bc67fb42",
    "size": 2773
   },
   "alloy-editor/all.css": {
    "b3": "a82ae03bdb710ec462fe3a573bd5a653b824139c3c454315cf5716f280168305",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 3850,
    "sha512": "c36e704e59f76d6c3f2697f579521a50f880078534912bdbe2a30d0a55e8b319",
    "size": 55045
@@ -68,35 +68,35 @@
   },
   "css/all.css": {
    "b3": "a00c4b4cd846b59df2d68836b6b1f62e76449cf117c199689cd8464ac9b969fc",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 58895,
    "sha512": "baf97d4c11df203978df8945e6bf037676cb742bdfe81faa92eb81426e6ed9fe",
    "size": 42322
   },
   "data-default/data.json": {
    "b3": "efaa37d8d69472761ab1ec14d6dbbc0d5664c3764f24582e1b3d3b475cdf190f",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 101217,
    "sha512": "2e148ded67a3e4cfc86db1cdbaf87bb425ab8597dac15a9b351c2a1c175a0da8",
    "size": 398
   },
   "data-default/users/content-default.json": {
    "b3": "bcfd49c0f9329050b248c5326dd5179b82da84f631f56fb8bec69e1faa4a4959",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 101615,
    "sha512": "241ece56c52c5d205dfac86de5298c9b1505058d2012d4251860ba8ec823b905",
    "size": 665
   },
   "data/data.json": {
    "b3": "bec6ccce75b3f21a757069f613102e135af370ecca2dc40351d1facaa13b3b71",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 102280,
    "sha512": "4aeefbe46d5bdb47659484be1166120860fa42c438215e5a98ca85216a40104d",
    "size": 62467
   },
   "dbschema.json": {
    "b3": "d438f3816173d48bfe5c099326263168ef00d10b18c15aaf18a7ae91bd982a91",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 164747,
    "sha512": "2f171016bd5ffbdb7fc11a5a7786f353f6d97fb86abd1cc3920973e0dcc38407",
    "size": 3287
@@ -117,28 +117,28 @@
   },
   "img/logo.svg": {
    "b3": "529e9b8aafe913e1dc15887f2f256fa81b3e49f608f07385cc46cf46b2ee25c8",
-   "bundle": "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190",
+   "bundle": "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e",
    "off": 0,
    "sha512": "e07cf3e5d26665f4846b226855a9f996aa12da73107ea3d5be163ad758f33c3a",
    "size": 974
   },
   "index.html": {
-   "b3": "767241f05355e14c67ef0262a6e636968b54f5c81e01f4675c8ee8409e62e41d",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "b3": "9d56aef197a004f2ad206255ed8b0fb734d51eb9885c0c939d25a21ec234b546",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 168034,
-   "sha512": "e810a8137f51f795f85f4eebc26b45405580ab6f6fcc15ff53a70202aefa6f12",
+   "sha512": "8b53f9808d55e5750986534481c91cae036bd5adb8eb2aeb2e3e184843bd3dcc",
    "size": 8982
   },
   "js/Comments.js": {
    "b3": "166355f0afd9d87f60ba869eeb37d6a0e16ebf5d20755f9b0d44e94a17abe615",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 177016,
    "sha512": "40cdbe7b05282b80df827271670a256767bddee3b649ffe4b5b8f0aac08883de",
    "size": 7700
   },
   "js/EpixBlog.js": {
    "b3": "e684adc737285b980678d500d64e470dd8539b927145556058a4b6bd7039337e",
-   "bundle": "44e78931b8827fd50487efbd30bd765a9d648e297978b11a15b8a1b1ab165aca",
+   "bundle": "4c47157df355dceee88269313820f8b82f082320ab87c82a9d1a00c571bfb98c",
    "off": 184716,
    "sha512": "6a6d38c90af3b7dd1a54a95fc5adfb5a14a50bb8694b7aa66bf80aa848f70aef",
    "size": 45502
@@ -152,8 +152,8 @@
   },
   "js/lib/epix-avatar.js": {
    "b3": "db71c02fe6ba8cdd7c7f9f1836868cebee7dfc84346c3ab473878006bd9cd02b",
-   "bundle": "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190",
-   "off": 40268,
+   "bundle": "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e",
+   "off": 41516,
    "sha512": "9d92c2e073510b60202ff4aa06e4b9affa549a08e9cded762ea5c59fc91f524c",
    "size": 5173
   },
@@ -214,11 +214,11 @@
    "size": 8029
   },
   "js/utils/BlogLogo.js": {
-   "b3": "43ee30b6e59d5aa11d68a966fc11036f5f9263d8c5911933c411fef12806349c",
-   "bundle": "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190",
-   "off": 45441,
-   "sha512": "cac8fd5d1d2fa8630e97e3fb270c2bf3590e90003192daa87c59e5da11c873df",
-   "size": 6405
+   "b3": "3d0988ec9dd4bab965467b569bace707ad188731012d2da46de25a965fb411fb",
+   "bundle": "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e",
+   "off": 46689,
+   "sha512": "7f3e994cc56a7503e6be2894ad88239e518ed494d7f761e584a4d96cda07a582",
+   "size": 6584
   },
   "js/utils/CustomAlloyEditor.js": {
    "b3": "7d6b128f01bd229d58cdfc4c3edec54ba20913f3aeb919a6e3fa02150b6a82c6",
@@ -355,48 +355,48 @@
   },
   "tests/blog-logo.test.cjs": {
    "b3": "b9b233fb05f7d6bac3217fde55a9179a205a1dae855b913234e14481e882f0b5",
-   "bundle": "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190",
-   "off": 51846,
+   "bundle": "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e",
+   "off": 53273,
    "sha512": "e92b8687ed7b809c9ef301ed335f4e32aac5a397763545c720ba92ce53157b26",
    "size": 4288
   },
   "tests/editing-browser.cjs": {
-   "b3": "e56c3f2067e29cdafdb6df3822200510f1f36db7eac9240d092cce692893861f",
-   "bundle": "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190",
+   "b3": "7719f6a7444b5c7f302618ca1c8f95a4f751618b760dde5b4165fd7cbbb78058",
+   "bundle": "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e",
    "off": 9766,
-   "sha512": "c4ab4cf54ff4200a738e183c611dbdeb186adab2da2c17d61ce7bcc8c693a333",
-   "size": 18561
+   "sha512": "3d9d72d118160e956bcefd798c3bd80691583ff6cb33cb5074def0e4fc720e12",
+   "size": 19809
   },
   "tests/editor-formatting.cjs": {
    "b3": "a76970330186d77b0fa646546c6a361c9e4c0d7f8dd452cd219957011c8e0a79",
-   "bundle": "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190",
-   "off": 28327,
+   "bundle": "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e",
+   "off": 29575,
    "sha512": "310461d026e4d1cbd00970bdba58475609e95b45fe7c0171a717a0618e008655",
    "size": 11941
   },
   "tests/loading.test.cjs": {
    "b3": "ee60019be3923b0ccada64a634fde23f75376d14bde1fb617f2a0960fa1e733b",
-   "bundle": "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190",
+   "bundle": "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e",
    "off": 974,
    "sha512": "ff6542a46b52e51e48f735155d6a005f32091f9be80bffd8020585d3d5600392",
    "size": 4206
   },
   "tests/xid-avatar.test.cjs": {
    "b3": "0de67ab10cf16c7970cfe46d127d196ca3bf5ab63e052a4e2b4fca37dc9e55c6",
-   "bundle": "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190",
-   "off": 56134,
+   "bundle": "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e",
+   "off": 57561,
    "sha512": "9898d589c0811aa6ef61c8cc45a3082190e3b0e0cbd2d997ba66c6a2738f354c",
    "size": 12913
   },
   "tests/xid-login.test.cjs": {
    "b3": "f1372d09033f81b31fe979fc80ffb33827ed31c6f05689297c11f13c90edbb5f",
-   "bundle": "57483767aa4a0399b20f5bb1c11c679428d77824b33b08f782080c816a9bd190",
+   "bundle": "dc6587ce6c90a7cdc41b8ce55711f4b163a1074796ca425f1a896a0bef05635e",
    "off": 5180,
    "sha512": "e0aa7971f6b45ce9d4cfa4a9c2ddb1f8bdef783b61362dca1b3fe3f1ff9070a3",
    "size": 4586
   }
  },
- "files_merkle_root": "6a7654c81701ca7ef4182d4e6ee6fe5c4909f88496fb68072349196e07351884",
+ "files_merkle_root": "eba7523da0829c95bab3476f7f20a543d668a68eb17ff120ee77d8467d374644",
  "ignore": "((css|alloy-editor)/(?!all\\.(js|css))|data/.*db|data/users/.*|.*\\.coffee|js/all\\.js|js/lib/all\\.js|\\.git)",
  "includes": {
   "data/users/content.json": {
@@ -405,7 +405,7 @@
   }
  },
  "inner_path": "content.json",
- "modified": 1793663373,
+ "modified": 1793663823,
  "optional": "data/video/.*mp4",
  "order_policy": {
   "first_paint": ["index.html","css/all.css","js/lib/00-jquery.min.js","js/lib/jquery.csslater.js","js/lib/jquery.cssanim.js","js/lib/highlight.min.js","js/lib/marked.min.js","js/lib/zoom.min.js","js/lib/pnglib.js","js/lib/identicon.js","js/lib/epixframe.js","js/lib/epix-avatar.js","js/utils/LogMixin.js","js/utils/RateLimit.js","js/utils/Time.js","js/utils/Text.js","js/utils/Translate.js","js/utils/Menu.js","js/utils/Meditor.js","js/utils/CustomAlloyEditor.js","js/utils/InlineEditor.js","js/utils/User.js","js/utils/BlogLogo.js","js/utils/Follow.js","js/Comments.js","js/EpixBlog.js","img/logo.svg","img/avatar.svg","data/data.json"],
@@ -414,7 +414,7 @@
  "postmessage_nonce_security": true,
  "shard": "",
  "signers_sign": "HCw3hYH2z0TJPlNJsBMIptwXsXm78VOSetRIFv1EojQlQih7CK+icYj20pLBPbo6yix18QtuGyIOLoZ93rNs2yI=",
- "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "Gxv3fntkeWrFQTWJAgPgCPL+KRiu9zhaTNn2ymDt8N1XJJMJwiB5e4ESUKCj9DYsY87QRcnjzDx1BNuxjqGbROI="},
+ "signs": {"epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f": "G3OdbTIUBd0VhnHnkK48JeJmlA+pPVpZgbwFGZm/Yz1pUBVVRjCQpNRu+uU18/FzdyY9z7wIx+GCwXcAoOLJ918="},
  "signs_required": 1,
  "title": "Epix Blog",
  "translate": ["index.html","js/EpixBlog.js","js/Comments.js","js/utils/User.js","js/utils/Translate.js","js/utils/Text.js","js/utils/InlineEditor.js","js/utils/Follow.js","alloy-editor/all.js"],
