@@ -4,10 +4,12 @@ const path = require("node:path");
 const test = require("node:test");
 const vm = require("node:vm");
 
-function setup(pageClass = "page-main") {
+function setup(pageClass = "page-main", embedded = false) {
   const nodes = [], calls = [];
   function node(tag, attrs = {}, parent = null) {
     const item = { tag, attrs, parent, children: [], handlers: {}, style: {}, value: "", removed: false };
+    item.setAttribute = (key, value) => { attrs[key] = value; };
+    item.removeAttribute = key => { delete attrs[key]; };
     nodes.push(item);
     if (parent) parent.children.push(item);
     return item;
@@ -41,7 +43,7 @@ function setup(pageClass = "page-main") {
     return holder.children;
   }
   function wrap(items) {
-    const result = { items, length: items.length };
+    const result = { items, length: items.length, 0: items[0] };
     result.attr = (key, value) => {
       if (typeof key === "string" && value === undefined) return items[0]?.attrs[key];
       for (const item of items) Object.assign(item.attrs, typeof key === "object" ? key : { [key]: value });
@@ -87,6 +89,11 @@ function setup(pageClass = "page-main") {
     window: { EpixFrame: class { log() {} }, location: { search: "" } },
     $, LogMixin: { log() {} }, Text: { toColor: () => "purple" }, setTimeout() {},
   });
+  if (!embedded) context.window.parent = context.window;
+  context.URL = URL;
+  context.clearTimeout = () => {};
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "../js/lib/epix-avatar.js"), "utf8"), context);
+  context.EpixAvatar = context.window.EpixAvatar;
   for (const file of ["js/utils/User.js", "js/EpixBlog.js"]) {
     vm.runInContext(fs.readFileSync(path.join(__dirname, "..", file), "utf8"), context, { filename: file });
   }
@@ -115,7 +122,7 @@ const identity = name => ({
 });
 const profile = (name, avatar = `https://images.example.test/${name}.png`) => ({ name, tld: "epix", avatar });
 
-test("homepage resolves the selected reader's avatar without opening the picker", () => {
+test("homepage resolves the selected reader's avatar without opening the picker", async () => {
   const { page, take, find, calls, text } = setup();
   page.setSiteinfo(identity("alice"));
   const lookup = take("xidResolve");
@@ -123,6 +130,7 @@ test("homepage resolves the selected reader's avatar without opening the picker"
   lookup.cb(profile("alice"));
   assert.equal(find(".xid-tag").length, 1);
   assert.equal(text(find(".xid-tag")[0]), "alice.epix");
+  await new Promise(setImmediate);
   assert.equal(find("img")[0].attrs.src, profile("alice").avatar);
   assert.equal(calls.some(call => call.command === "certXid"), false);
 });
@@ -145,7 +153,7 @@ test("post pages retain their existing automatic xID prompt", () => {
   take("certXid");
 });
 
-test("homepage identity changes clear the old photo before the new lookup completes", () => {
+test("homepage identity changes clear the old photo before the new lookup completes", async () => {
   const { page, user, take, find, text } = setup();
   page.setSiteinfo(identity("alice")); take("xidResolve").cb(profile("alice"));
   page.setSiteinfo({ ...identity("bob"), event: ["cert_changed"] });
@@ -153,15 +161,17 @@ test("homepage identity changes clear the old photo before the new lookup comple
   assert.equal(user.xid_avatar, null);
   take("xidResolve").cb(profile("bob"));
   assert.equal(text(find(".xid-tag")[0]), "bob.epix");
+  await new Promise(setImmediate);
   assert.equal(find("img")[0].attrs.src, profile("bob").avatar);
 });
 
-test("late old-identity replies cannot replace the current badge", () => {
+test("late old-identity replies cannot replace the current badge", async () => {
   const { page, take, find, text } = setup();
   page.setSiteinfo(identity("alice")); const old = take("xidResolve");
   page.setSiteinfo(identity("bob")); take("xidResolve").cb(profile("bob"));
   old.cb(profile("alice"));
   assert.equal(text(find(".xid-tag")[0]), "bob.epix");
+  await new Promise(setImmediate);
   assert.equal(find("img")[0].attrs.src, profile("bob").avatar);
 });
 
@@ -186,7 +196,7 @@ test("ordinary homepage progress updates do not restart profile lookups", () => 
   assert.equal(calls.some(call => call.command === "xidResolve"), false);
 });
 
-test("avatar values stay opaque image attributes and names stay text", () => {
+test("avatar values stay opaque image attributes and names stay text", async () => {
   const { user, find, text } = setup();
   const avatar = 'https://images.example.test/a.png" onload="unexpected()';
   const display = 'reader<img src="unexpected">.epix';
@@ -194,6 +204,7 @@ test("avatar values stay opaque image attributes and names stay text", () => {
   user.showXidTag(display);
   const images = find("img");
   assert.equal(images.length, 1);
+  await new Promise(setImmediate);
   assert.equal(images[0].attrs.src, avatar);
   assert.equal(images[0].attrs.onload, undefined);
   assert.equal(images[0].attrs.onerror, undefined);
@@ -201,11 +212,12 @@ test("avatar values stay opaque image attributes and names stay text", () => {
   assert.equal(text(find(".xid-tag")[0]), display);
 });
 
-test("profile URL formats are preserved like the xID profile editor", () => {
+test("profile URL formats are preserved like the xID profile editor", async () => {
   for (const avatar of ["https://images.example.test/a.png", "http://photos.epix/a.png",
     "images/reader.png", "data:image/png;base64,iVBORw0KGgo=", "ipfs://example/avatar.png", "epix://photos.epix/avatar.png"]) {
     const { user, find } = setup();
     user.xid_avatar = avatar; user.showXidTag("reader.epix");
+    await new Promise(setImmediate);
     assert.equal(find("img")[0].attrs.src, avatar);
   }
 });
@@ -223,12 +235,29 @@ test("missing and broken avatars retain a readable named badge", () => {
   assert.equal(text(find(".xid-tag")[0]), "reader.epix");
 });
 
-test("a late broken image event from the previous badge cannot remove the new avatar", () => {
+test("a late broken image event from the previous badge cannot remove the new avatar", async () => {
   const { user, find, text } = setup();
   user.xid_avatar = "https://images.example.test/old.png"; user.showXidTag("old.epix");
   const old = find("img")[0];
   user.xid_avatar = "https://images.example.test/new.png"; user.showXidTag("new.epix");
   old.handlers.error.call(old);
+  await new Promise(setImmediate);
   assert.equal(find("img")[0].attrs.src, "https://images.example.test/new.png");
   assert.equal(text(find(".xid-tag")[0]), "new.epix");
+});
+
+
+test("an embedded reader badge displays the node thumbnail for its 20px slot", async () => {
+  const { page, take, find } = setup("page-main", true);
+  page.setSiteinfo(identity("alice"));
+  take("xidResolve").cb(profile("alice"));
+  const request = take("wrapperGetAvatarThumbnail");
+  assert.equal(request.params.url, profile("alice").avatar);
+  assert.equal(request.params.size, 20);
+  const image = find("img")[0];
+  assert.equal(image.attrs.src, undefined);
+  const thumbnail = "data:image/png;base64,QQ==";
+  request.cb({ thumbnail });
+  await new Promise(setImmediate);
+  assert.equal(image.attrs.src, thumbnail);
 });

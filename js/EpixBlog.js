@@ -155,14 +155,13 @@
       if (user_address === site_info.xid_directory) {
         resolve_address = site_info.auth_address;
       }
+      elem.data("xid-author", resolve_address || "");
       User.resolveXidName(resolve_address, function(name, tld, avatar) {
-        elem.find(".comment-avatar").remove();
+        if (elem.data("xid-author") !== (resolve_address || "")) return;
+        User.showCommentAvatar(elem.find(".user_name"), name && avatar, 16);
         if (name) {
           var display = name + "." + tld;
           elem.find(".user_name").text(display + ":").css("color", Text.toColor(display));
-          if (avatar) {
-            elem.find(".user_name").before("<img class='comment-avatar' src='" + avatar + "' onerror=\"this.style.display='none'\">");
-          }
         } else {
           elem.find(".user_name").text(Text.formatUsername(user_address) + ":").css("color", Text.toColor(user_address));
         }
