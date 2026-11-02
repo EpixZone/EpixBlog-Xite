@@ -80,14 +80,13 @@
       if (user_address === Page.site_info.xid_directory) {
         resolve_address = Page.site_info.auth_address;
       }
+      elem.data("xid-author", resolve_address || "");
       User.resolveXidName(resolve_address, function(name, tld, avatar) {
-        $(".comment-avatar", elem).remove();
+        if (elem.data("xid-author") !== (resolve_address || "")) return;
+        User.showCommentAvatar($(".user_name", elem), name && avatar, 20);
         if (name) {
           var display = name + "." + tld;
           $(".user_name", elem).text(display).css("color", Text.toColor(display)).attr("title", display + ": " + user_address);
-          if (avatar) {
-            $(".user_name", elem).before("<img class='comment-avatar' src='" + avatar + "' onerror=\"this.style.display='none'\">");
-          }
         } else {
           $(".user_name", elem).text(Text.formatUsername(user_address)).css("color", Text.toColor(user_address)).attr("title", user_address);
         }

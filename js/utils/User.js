@@ -202,22 +202,32 @@
       });
       if (typeof avatar === "string" && avatar) {
         tag.css("padding", "4px 10px");
-        var image = $('<img class="xid-avatar" alt="">').css({
+        var image = $('<img class="xid-avatar" alt="" referrerpolicy="no-referrer">').css({
           "width": "20px", "height": "20px", "border-radius": "50%", "object-fit": "cover",
           "border": "1px solid " + textColor, "vertical-align": "middle", "margin-right": "4px"
         }).on("error", function() {
           $(this).remove();
           tag.css("padding", "6px 12px");
         });
-        // Match the xID profile's image URL contract without parsing profile
-        // values as markup or rewriting them through a third-party gateway.
-        image.attr({ "src": avatar, "referrerpolicy": "no-referrer" });
         tag.append(image);
+        EpixAvatar.bind(image[0], avatar, 20);
       }
       tag.append($("<span></span>").text(display).css({
         "color": textColor, "font-size": "12px", "font-family": "consolas, menlo, monospace"
       }));
       $(".left h1").after(tag);
+    }
+
+    showCommentAvatar(label, source, size) {
+      var image = label.prev("img.comment-avatar");
+      if (!source) { image.remove(); return; }
+      if (!image.length) {
+        image = $('<img class="comment-avatar" alt="" referrerpolicy="no-referrer">').on("error", function() { $(this).hide(); });
+        label.before(image);
+      }
+      if (image.data("xid-avatar-url") === source) return;
+      image.data("xid-avatar-url", source).show();
+      EpixAvatar.bind(image[0], source, size);
     }
 
     requireXid(cb) {
