@@ -99,11 +99,17 @@
     display(source, profile = false) {
       // A request for the old image can finish after the owner changes the logo.
       const image = this.image.cloneNode(false);
-      image.src = this.fallback;
+      const showFallback = () => {
+        image.onerror = null;
+        // The gateway needs the referring blog page to serve its local artwork.
+        image.referrerPolicy = "same-origin";
+        image.src = this.fallback;
+      };
+      showFallback();
       this.image.replaceWith(image);
       this.image = image;
       if (!source) return;
-      image.onerror = () => { image.onerror = null; image.src = this.fallback; };
+      image.onerror = showFallback;
       if (profile) EpixAvatar.bind(image, source, image.offsetWidth || 72);
       else image.src = source;
     }
