@@ -8,7 +8,10 @@ function setup(pageClass = "page-main", embedded = false) {
   const nodes = [], calls = [];
   function node(tag, attrs = {}, parent = null) {
     const item = { tag, attrs, parent, children: [], handlers: {}, style: {}, value: "", removed: false };
-    item.setAttribute = (key, value) => { attrs[key] = value; };
+    item.setAttribute = (key, value) => {
+      attrs[key] = value;
+      if (key === "src" && item.painted) item.painted(value);
+    };
     item.removeAttribute = key => { delete attrs[key]; };
     nodes.push(item);
     if (parent) parent.children.push(item);
@@ -89,7 +92,10 @@ function setup(pageClass = "page-main", embedded = false) {
     window: { EpixFrame: class { log() {} }, location: { search: "" } },
     $, LogMixin: { log() {} }, Text: { toColor: () => "purple" }, setTimeout() {},
   });
-  if (!embedded) context.window.parent = context.window;
+  context.window.parent = embedded ? { postMessage(message, target, [port]) {
+    calls.push({ command: message.cmd, params: message.params, cb(value) { port.postMessage(value); port.close(); } });
+  } } : context.window;
+  context.MessageChannel = MessageChannel;
   context.URL = URL;
   context.clearTimeout = () => {};
   vm.runInContext(fs.readFileSync(path.join(__dirname, "../js/lib/epix-avatar.js"), "utf8"), context);
@@ -103,6 +109,7 @@ function setup(pageClass = "page-main", embedded = false) {
     site_info: null, event_site_info: { resolve() {} },
     cmd(command, params, cb) {
       if (command === "fileRules") return cb({});
+      if (command === "wrapperAvatarThumbnailVersion") return cb(1);
       calls.push({ command, params, cb });
     },
     initFollowButton() { this.follow = { feeds: {} }; }, migrateRecords() {},
@@ -247,17 +254,19 @@ test("a late broken image event from the previous badge cannot remove the new av
 });
 
 
-test("an embedded reader badge displays the node thumbnail for its 20px slot", async () => {
+test("an embedded reader badge displays the node thumbnail for its 20px slot", { timeout: 3000 }, async () => {
   const { page, take, find } = setup("page-main", true);
   page.setSiteinfo(identity("alice"));
   take("xidResolve").cb(profile("alice"));
+  await new Promise(setImmediate);
   const request = take("wrapperGetAvatarThumbnail");
   assert.equal(request.params.url, profile("alice").avatar);
   assert.equal(request.params.size, 20);
   const image = find("img")[0];
   assert.equal(image.attrs.src, undefined);
   const thumbnail = "data:image/png;base64,QQ==";
+  const painted = new Promise(resolve => { image.painted = resolve; });
   request.cb({ thumbnail });
-  await new Promise(setImmediate);
+  await painted;
   assert.equal(image.attrs.src, thumbnail);
 });
