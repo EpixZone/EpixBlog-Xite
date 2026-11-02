@@ -15,6 +15,15 @@ const profile = (name, target) => ({
   dns_records: [{record_type: 65280, value: target}]
 });
 
+test("logo settings use the standalone blog's existing data index", () => {
+  const schema = JSON.parse(readFileSync(path.join(root, "dbschema.json"), "utf8"));
+  // EpixNet reserves schema version 3 for merger xites.
+  assert.equal(schema.version, 2);
+  const fields = schema.maps["data.json"].to_keyvalue;
+  for (const key of ["title", "description", "owner_xid", "logo_image"]) assert.ok(fields.includes(key));
+  assert.deepEqual(schema.maps["data.json"].to_table, ["post"]);
+});
+
 function setup() {
   const manifest = {domain: "styro.epix", files: {"img/avatar.svg": {sha512}}};
   const calls = [];
