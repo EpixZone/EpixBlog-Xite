@@ -20,7 +20,8 @@ function setup(pageClass = "page-main", embedded = false) {
     return item;
   }
   const body = node("body", { class: pageClass });
-  const heading = node("h1", {}, body);
+  const actions = node("div", { class: "identity-actions" }, body);
+  node("a", { class: "feed-follow" }, actions);
   const username = node("a", { class: "certselect user_name" }, body);
   const comment = node("div", { class: "comment-new" }, body);
   const live = item => !item.removed && (!item.parent || live(item.parent));
@@ -74,10 +75,11 @@ function setup(pageClass = "page-main", embedded = false) {
       }
       return result;
     };
-    for (const method of ["append", "after"]) result[method] = value => {
+    for (const method of ["append", "before"]) result[method] = value => {
       for (const item of value.items || fragment(value)) {
         item.parent = method === "append" ? items[0] : items[0].parent;
-        item.parent.children.push(item);
+        if (method === "append") item.parent.children.push(item);
+        else item.parent.children.splice(item.parent.children.indexOf(items[0]), 0, item);
       }
       return result;
     };
@@ -86,7 +88,6 @@ function setup(pageClass = "page-main", embedded = false) {
   function $(selector) {
     if (typeof selector === "object") return wrap([selector]);
     if (selector.startsWith("<")) return wrap(fragment(selector));
-    if (selector === ".left h1") return wrap([heading]);
     return wrap(nodes.filter(item => live(item) && matches(item, selector)));
   }
   $.when = () => ({ done() {} });

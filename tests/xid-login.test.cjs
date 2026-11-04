@@ -16,7 +16,7 @@ function setup(info = null) {
         element.value = value;
         return element;
       };
-      for (const method of ["css", "addClass", "removeClass", "remove", "append", "after"]) {
+      for (const method of ["css", "addClass", "removeClass", "remove", "append", "before"]) {
         element[method] = () => element;
       }
       elements.set(selector, element);

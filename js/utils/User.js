@@ -176,13 +176,13 @@
     showXidFab() {
       var self = this;
       $(".xid-fab, .xid-tag").remove();
-      var fab = $('<a href="#" class="xid-fab nolink" style="background: #F0B622; display: inline-block; padding: 6px 12px; color: #09090A; font-size: 14px; text-transform: uppercase; font-family: consolas, menlo, monospace; text-decoration: none; cursor: pointer; border-radius: 8px; margin-left: 10px;" title="Register xID">xID</a>');
+      var fab = $('<a href="#" class="xid-fab nolink" style="background: #F0B622; display: inline-block; padding: 6px 12px; color: #09090A; font-size: 14px; text-transform: uppercase; font-family: consolas, menlo, monospace; text-decoration: none; cursor: pointer; border-radius: 8px;" title="Register xID">xID</a>');
       fab.on("click", function(e) {
         e.preventDefault();
         self.triggerCertXid();
         return false;
       });
-      $(".left h1").after(fab);
+      $(".feed-follow").before(fab);
     }
 
     showXidTag(display) {
@@ -197,8 +197,7 @@
       var avatar = this.xid_avatar;
       var tag = $('<a href="#" class="xid-tag nolink"></a>').css({
         "display": "inline-block", "padding": "6px 12px", "background": bgColor,
-        "cursor": "pointer", "text-decoration": "none", "border-radius": "8px",
-        "margin-left": "10px", "vertical-align": "middle"
+        "cursor": "pointer", "text-decoration": "none", "border-radius": "8px"
       });
       if (typeof avatar === "string" && avatar) {
         tag.css("padding", "4px 10px");
@@ -215,7 +214,7 @@
       tag.append($("<span></span>").text(display).css({
         "color": textColor, "font-size": "12px", "font-family": "consolas, menlo, monospace"
       }));
-      $(".left h1").after(tag);
+      $(".feed-follow").before(tag);
     }
 
     showCommentAvatar(label, source, size) {

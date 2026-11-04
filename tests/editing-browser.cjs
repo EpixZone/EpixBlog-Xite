@@ -133,6 +133,31 @@ const server = http.createServer((req, res) => {
       return img.src.endsWith("/img/avatar.svg?retry") && img.complete && img.naturalWidth === 72;
     }, null, { timeout: 3000 });
     console.log("PASS gateway local logo on first paint and after a failed profile image");
+    for (const width of [1280, 768, 390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      const positions = await page.evaluate(() => {
+        const box = selector => document.querySelector(selector).getBoundingClientRect();
+        $(".feed-follow").css("display", "inline-block");
+        const measure = () => {
+          const badge = box(".xid-tag, .xid-fab");
+          const description = box(".left .description");
+          return { offset: badge.left - description.left, gap: badge.top - box(".left h1").bottom,
+            fits: badge.right <= description.right };
+        };
+        User.showXidFab();
+        const guest = measure();
+        User.showXidTag("reader.epix");
+        const reader = measure();
+        User.showXidTag("a-very-long-reader-name".repeat(3) + ".epix");
+        return [guest, reader, measure()];
+      });
+      for (const badge of positions) {
+        assert.equal(badge.offset, 0, "xID lines up with the description at width " + width);
+        assert.ok(badge.gap >= 8, "xID has space below the blog title at width " + width);
+        assert.ok(badge.fits, "xID wraps inside the rail at width " + width);
+      }
+    }
+    console.log("PASS xID controls align below the blog title on desktop and mobile");
     await reset();
     assert.equal(await page.locator(".editable-edit:visible").count(), 3, "one pencil per post and profile");
     assert.equal(await page.locator("#post_1 > .editable-edit").evaluate(el => {
