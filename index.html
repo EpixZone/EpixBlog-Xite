@@ -69,7 +69,9 @@
     <img class="avatar" src="img/avatar.svg" alt="" referrerpolicy="same-origin">
  </a>
  <h1><a href="?Home" class="nolink" data-editable="title" data-editable-mode="simple"></a></h1>
- <a href="#Follow" class="feed-follow"><span class='text-follow'>Follow in Newsfeed</span><span class='text-following'>Following</span><div class="icon-feed"></div></a>
+ <div class="identity-actions">
+  <a href="#Follow" class="feed-follow"><span class='text-follow'>Follow in Newsfeed</span><span class='text-following'>Following</span><div class="icon-feed"></div></a>
+ </div>
  <h2 data-editable="description" class="description"></h2>
  <div class="left-more">
   <hr>
@@ -79,6 +81,13 @@
    <label>Upload a logo <input class="blog-logo-file" type="file" accept="image/png,image/jpeg,image/webp"></label>
    <button type="button" class="reset-blog-logo" hidden>Use blog default</button>
    <small>Sign and publish to share your changes.</small>
+  </fieldset>
+  <fieldset class="blog-favicon-controls" hidden>
+   <legend>Tab icon (favicon)</legend>
+   <button type="button" class="use-blog-logo">Use current blog logo</button>
+   <label>Upload a tab icon <input class="blog-favicon-file" type="file" accept="image/png,image/jpeg,image/webp"></label>
+   <button type="button" class="reset-blog-favicon">Restore original tab icon</button>
+   <small>Sign and publish to share the icon. Reopen the blog tab to see it.</small>
   </fieldset>
   <div class="links" data-editable="links" data-editable-mode="meditor"></div>
 
@@ -228,6 +237,7 @@
 <script src="js/utils/InlineEditor.js"></script>
 <script src="js/utils/User.js"></script>
 <script src="js/utils/BlogLogo.js"></script>
+<script src="js/utils/BlogFavicon.js"></script>
 <script src="js/utils/Follow.js"></script>
 
 <!-- App -->

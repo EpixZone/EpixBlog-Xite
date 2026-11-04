@@ -44,6 +44,10 @@ epix18l0gy59ka9ka89wm9mwsspfmkcv9tvf7g0cs6f/
 
 A blog using the template logo shows its domain's xID avatar when the signed domain points back to the blog. Owners can open **Blog logo** in the sidebar (under the menu on mobile) to choose their own xID avatar or upload an image. Use **Sign & Publish new content** to share the logo with readers. **Use blog default** restores the original behavior.
 
+## Tab icon
+
+Owners can open **Tab icon (favicon)** in the same sidebar to use the current blog logo, upload a PNG, JPEG or WebP, or restore the original tab icon. Choose **Sign & Publish new content**, then reopen the blog tab to see the new icon in the browser. An uploaded icon stays with the blog when it is shared.
+
 ## Database
 
 - **File:** `data/epixblog.db`

@@ -12,6 +12,9 @@
       if (window.BlogLogo && document.querySelector(".blog-logo-controls") && document.querySelector(".avatar-link img.avatar")) {
         this.blogLogo = new BlogLogo(this);
       }
+      if (window.BlogFavicon && document.querySelector(".blog-favicon-controls")) {
+        this.blogFavicon = new BlogFavicon(this, document.querySelector(".blog-favicon-controls"));
+      }
 
       this.event_page_load = $.Deferred();
       this.event_site_info = $.Deferred();
@@ -26,13 +29,13 @@
       this.setSiteinfo = this.setSiteinfo.bind(this);
 
       var self = this;
+      $(".publishbar").off("click").on("click", this.publish);
 
       // Editable items on own site
       $.when(this.event_page_load, this.event_site_info).done(function() {
         if (self.site_info.settings.own || self.data.demo) {
           self.addInlineEditors();
           self.checkPublishbar();
-          $(".publishbar").off("click").on("click", self.publish);
           $(".posts .button.new").css("display", "inline-block");
           $(".editbar .icon-help").off("click").on("click", function() {
             $(".editbar .markdown-help").css("display", "block");
@@ -393,7 +396,7 @@
       // races the siteInfo still carrying the previous content.json stamp,
       // so the condition flipped true and the bar stuck until the next event.
       var can_sign = this.site_info && (this.site_info.settings.own || this.site_info.privatekey);
-      if (can_sign && this.data != null && (this.blogLogo?.pendingPublish || !this.data["modified"] || this.data["modified"] > this.site_info.content.modified)) {
+      if (can_sign && this.data != null && (this.blogLogo?.pendingPublish || this.blogFavicon?.needsPublish() || !this.data["modified"] || this.data["modified"] > this.site_info.content.modified)) {
         $(".publishbar").addClass("visible");
       } else {
         $(".publishbar").removeClass("visible");
@@ -401,14 +404,19 @@
     }
 
     publish() {
+      if (!this.site_info?.settings?.own && !this.site_info?.privatekey) return false;
       var self = this;
       var logoChange = this.blogLogo?.pendingPublish;
+      var faviconChange = this.blogFavicon?.pendingPublish;
       var published = function(res) {
         self.log("Publish result:", res);
         if (res === "ok" && logoChange && self.blogLogo.pendingPublish === logoChange) {
           self.blogLogo.pendingPublish = null;
-          self.checkPublishbar();
         }
+        if (res === "ok" && faviconChange && self.blogFavicon.pendingPublish === faviconChange) {
+          self.blogFavicon.pendingPublish = null;
+        }
+        self.checkPublishbar();
       };
       if (this.site_info.privatekey) {
         this.cmd("sitePublish", ["stored"], published);
@@ -1080,6 +1088,7 @@
         site_info.settings = Object.assign({}, previous.settings, site_info.settings);
       }
       this.site_info = site_info;
+      this.blogFavicon?.refresh();
       this.blogLogo?.refresh(incoming_event?.[0] === "file_done" &&
         (incoming_event[1] === "img/avatar.svg" || incoming_event[1] === "content.json"));
       this.event_site_info.resolve(site_info);
