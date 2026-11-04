@@ -289,9 +289,9 @@ input.text:focus, textarea:focus { border-color: var(--epix-focus); outline: non
 .left .avatar {
 	width: 72px; height: 72px; border-radius: 100%; display: block; object-fit: cover;
 }
-.blog-logo-controls { margin: 12px 0; padding: 10px; border: 1px solid var(--epix-border); min-width: 0 }
-.blog-logo-controls:not([hidden]) { display: grid; gap: 8px; justify-items: start }
-.blog-logo-controls label, .blog-logo-file { display: block; max-width: 100% }
+.blog-logo-controls, .blog-favicon-controls { margin: 12px 0; padding: 10px; border: 1px solid var(--epix-border); min-width: 0 }
+.blog-logo-controls:not([hidden]), .blog-favicon-controls:not([hidden]) { display: grid; gap: 8px; justify-items: start }
+.blog-logo-controls label, .blog-logo-file, .blog-favicon-controls label, .blog-favicon-file { display: block; max-width: 100% }
 .left h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.2px; margin-top: 16px; line-height: 1.3; overflow-wrap: anywhere }
 .left h1 a.nolink { display: inline-block; padding: 1px }
 .identity-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; width: 100%; margin-top: 14px }
