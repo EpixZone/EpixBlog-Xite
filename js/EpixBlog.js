@@ -887,7 +887,7 @@
         var blog = changes.blog_post_id != null ? changes.blog_post_id : (orig ? orig.blog_post_id : null);
         if (blog != null) record["blog_post_id"] = blog;
         record["body"] = changes.deleted ? "" : (changes.body != null ? changes.body : (orig ? orig.body : ""));
-        self.saveRecord(collection, record, cb);
+        return self.saveRecord(collection, record, cb);
       });
     }
 
@@ -915,7 +915,7 @@
           "date_added": orig ? orig.date_added : Time.timestamp()
         };
         if (active) record["vote"] = 1;
-        self.saveRecord(collection, record, cb);
+        return self.saveRecord(collection, record, cb);
       });
     }
 
