@@ -201,15 +201,13 @@
       });
       if (typeof avatar === "string" && avatar) {
         tag.css("padding", "4px 10px");
-        var image = $('<img class="xid-avatar" alt="" referrerpolicy="no-referrer">').css({
-          "width": "20px", "height": "20px", "border-radius": "50%", "object-fit": "cover",
-          "border": "1px solid " + textColor, "vertical-align": "middle", "margin-right": "4px"
-        }).on("error", function() {
+        var image = $('<img class="xid-avatar" alt="" referrerpolicy="no-referrer">').on("error", function() {
           $(this).remove();
           tag.css("padding", "6px 12px");
         });
         tag.append(image);
-        EpixAvatar.bind(image[0], avatar, 20);
+        var pixels = Math.min(128, Math.ceil(20 * Math.max(1, window.devicePixelRatio || 1)));
+        EpixAvatar.bind(image[0], avatar, pixels);
       }
       tag.append($("<span></span>").text(display).css({
         "color": textColor, "font-size": "12px", "font-family": "consolas, menlo, monospace"

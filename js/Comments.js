@@ -116,7 +116,7 @@
 
     submitComment() {
       var self = this;
-      if (!User.requireXid(function() { self.submitComment(); })) {
+      if (this.submitting || !User.requireXid(function() { self.submitComment(); })) {
         return false;
       }
 
@@ -126,27 +126,33 @@
         return false;
       }
 
+      this.submitting = true;
       $(".comment-new .button-submit").addClass("loading");
 
       // A comment is a brand-new signed record (nonce-based unique id). The node
       // fills author + post_id + sign, then UNION-merges it into comments.json,
       // so this can never overwrite another comment - the old blank-default sync
       // guard is gone.
-      var record = {
-        "nonce": Page.randNonce(),
-        "clock": Date.now(),
-        "supersedes": 0,
-        "deleted": false,
-        "blog_post_id": self.post_id,
-        "body": body,
-        "date_added": Time.timestamp()
-      };
-      Page.saveRecord("comments.json", record, function(res) {
+      const author = Page.site_info.auth_address;
+      if (this.draftAuthor !== author || this.draftRecord?.blog_post_id !== this.post_id) {
+        this.draftAuthor = author;
+        this.draftRecord = {
+          nonce: Page.randNonce(), clock: Date.now(), supersedes: 0, deleted: false,
+          blog_post_id: this.post_id, body: body, date_added: Time.timestamp()
+        };
+      } else if (body !== this.draftRecord.body) {
+        const previous = this.draftRecord.clock;
+        Object.assign(this.draftRecord, {body: body, supersedes: previous, clock: Math.max(previous + 1, Date.now())});
+      }
+      Page.saveRecord("comments.json", this.draftRecord, function(res) {
+        self.submitting = false;
         $(".comment-new .button-submit").removeClass("loading");
         User.checkCert("updaterules");
         self.log("submitComment result", res);
         if (res === true) {
-          $(".comment-new .comment-textarea").val("");
+          self.draftRecord = null;
+          const textarea = $(".comment-new .comment-textarea");
+          if (textarea.val() === body) textarea.val("");
           self.loadComments();
           setTimeout(function() {
             Page.loadLastcomments();
