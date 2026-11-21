@@ -123,7 +123,7 @@ function setup(pageClass = "page-main", embedded = false) {
     return calls.splice(index, 1)[0];
   };
   const find = selector => nodes.filter(item => live(item) && matches(item, selector));
-  return { user, page, calls, take, find, text, username, comment };
+  return { user, page, calls, take, find, text, username, comment, window: context.window };
 }
 
 const identity = name => ({
@@ -257,15 +257,16 @@ test("a late broken image event from the previous badge cannot remove the new av
 });
 
 
-test("an embedded reader badge displays the node thumbnail for its 20px slot", { timeout: 3000 }, async () => {
-  const { page, take, find } = setup("page-main", true);
+test("an embedded reader badge requests a thumbnail at screen resolution", { timeout: 3000 }, async () => {
+  const { page, take, find, window } = setup("page-main", true);
+  window.devicePixelRatio = 3;
   page.setSiteinfo(identity("alice"));
   take("xidResolve").cb(profile("alice"));
   await new Promise(setImmediate);
   const request = take("wrapperGetAvatarThumbnail");
   assert.equal(request.target, wrapperOrigin);
   assert.equal(request.params.url, profile("alice").avatar);
-  assert.equal(request.params.size, 20);
+  assert.equal(request.params.size, 60);
   const image = find("img")[0];
   assert.equal(image.attrs.src, undefined);
   const thumbnail = "data:image/png;base64,QQ==";

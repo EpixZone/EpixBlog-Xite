@@ -819,22 +819,47 @@
     // the user's content.json. The node union-merges the record into the on-disk
     // set (never overwriting other records) and signs+declares the merge file,
     // which propagates it. cb(true) on success.
-    saveRecord(collection, record, cb) {
-      var self = this;
-      Page.cmd("recordSign", [record], function(signed) {
-        if (!signed || signed.error) {
-          self.log("recordSign failed", signed);
-          if (cb) cb(false);
-          return;
-        }
-        var container = {"record_format": "epix-orset-1", "post": [signed]};
-        Page.cmd("fileWrite", [self.recordPath(collection), Text.jsonEncode(container)], function(res_write) {
-          Page.cmd("sitePublish", {"inner_path": self.recordContentPath()}, function(res_pub) {
-            self.log("saveRecord", collection, res_write, res_pub);
-            if (cb) cb(res_write === "ok" ? true : res_write);
-          });
-        });
+    async ensureCloneUserRules(info) {
+      if (!info.content?.cloned_from) return;
+      const path = "data/users/content.json";
+      const manifest = await this.cmd("fileGet", {inner_path: path, required: true});
+      const signs = JSON.parse(manifest)?.signs;
+      if (signs && Object.keys(signs).length) return;
+      // Older nodes copied this template into the clone without signing it.
+      // Only initialize the untouched template with the clone owner's key.
+      if (!info.privatekey) throw new Error("The blog owner needs to sign the user rules.");
+      const template = await this.cmd("fileGet", {
+        inner_path: "data-default/users/content-default.json", required: true
       });
+      if (!manifest || manifest !== template) throw new Error("The blog owner needs to review and sign the user rules.");
+      const result = await this.cmd("sitePublish", {inner_path: path, privatekey: "stored"});
+      if (result !== "ok") throw new Error("Could not publish the blog's user rules.");
+    }
+
+    async saveRecord(collection, record, cb) {
+      const info = this.site_info;
+      const recordPath = this.recordPath(collection);
+      const contentPath = this.recordContentPath();
+      let saved = false;
+      try {
+        await this.ensureCloneUserRules(info);
+        if (this.recordPath(collection) !== recordPath || this.site_info.auth_address !== info.auth_address) {
+          throw new Error("The selected identity changed. Please try again.");
+        }
+        const signed = await this.cmd("recordSign", [record]);
+        if (!signed?.sign) throw new Error("Could not sign the record with the selected identity.");
+        const container = {record_format: "epix-orset-1", post: [signed]};
+        const written = await this.cmd("fileWrite", [recordPath, Text.jsonEncode(container)]);
+        if (written !== "ok") throw new Error("Could not write the signed record.");
+        const published = await this.cmd("sitePublish", {inner_path: contentPath});
+        if (published !== "ok") throw new Error("Could not sign and publish the changes.");
+        saved = true;
+      } catch (error) {
+        this.log("saveRecord", collection, error);
+        const detail = error instanceof Error ? error.message : "Could not sign and publish the changes.";
+        this.cmd("wrapperNotification", ["error", $("<span>").text(detail).html()]);
+      }
+      if (cb) cb(saved);
     }
 
     // Build + sign a NEW version of an existing record (an edit or a tombstone)

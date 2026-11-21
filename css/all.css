@@ -481,10 +481,14 @@ code {
 }
 /* Keep photo scaling smooth and soften only the circular edge. The radius
    remains a fallback for browsers without masks; dimensions stay responsive. */
-.left .avatar, .comment-avatar {
+.left .avatar, .comment-avatar, .xid-avatar {
 	image-rendering: auto;
 	-webkit-mask-image: radial-gradient(circle closest-side, #fff calc(100% - 0.5px), transparent 100%);
 	mask-image: radial-gradient(circle closest-side, #fff calc(100% - 0.5px), transparent 100%);
+}
+.xid-avatar {
+	width: 20px; height: 20px; border-radius: 50%; object-fit: cover;
+	vertical-align: middle; margin-right: 4px;
 }
 .comment .added { color: var(--epix-text-low) }
 .comment .info { font-size: 13px; color: var(--epix-text-low); margin-bottom: 7px }
